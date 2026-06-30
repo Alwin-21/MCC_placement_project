@@ -59,7 +59,17 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(response.data));
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data || "Invalid username or password");
+      let errorMsg = "Invalid username or password";
+      if (err.response?.data) {
+        if (typeof err.response.data === "string") {
+          errorMsg = err.response.data;
+        } else if (err.response.data.errors) {
+          errorMsg = Object.values(err.response.data.errors).flat().join(", ");
+        } else if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
