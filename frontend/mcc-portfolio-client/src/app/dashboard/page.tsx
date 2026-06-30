@@ -1032,7 +1032,7 @@ Report Generated: ${new Date().toLocaleDateString()}
       
       {/* SIDEBAR NAVIGATION */}
       <div className={`w-72 border-r backdrop-blur-xl sticky top-0 h-screen flex flex-col transition-colors duration-300 shrink-0 ${
-        themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200"
+        themeMode === "dark" ? "bg-[#09090d] border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white shadow-xl"
       }`}>
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#781c1c] to-[#18233c] bg-clip-text text-transparent">
@@ -1048,43 +1048,43 @@ Report Generated: ${new Date().toLocaleDateString()}
 
         {/* 13 SECTIONS LINKS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-thin">
-          <button onClick={() => scrollTo("header-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("header-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <User size={16} className="text-[#781c1c]" /> Header Section
           </button>
-          <button onClick={() => scrollTo("about-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("about-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <FileText size={16} className="text-[#781c1c]" /> About Section
           </button>
-          <button onClick={() => scrollTo("experience-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("experience-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Briefcase size={16} className="text-[#781c1c]" /> Experience
           </button>
-          <button onClick={() => scrollTo("academic-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("academic-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Award size={16} className="text-[#781c1c]" /> Academic Details
           </button>
-          <button onClick={() => scrollTo("achievements-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("achievements-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Trophy size={16} className="text-[#781c1c]" /> Achievements
           </button>
-          <button onClick={() => scrollTo("projects-research-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("projects-research-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <GitBranch size={16} className="text-[#781c1c]" /> Projects & Research
           </button>
-          <button onClick={() => scrollTo("skills-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("skills-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Code size={16} className="text-[#781c1c]" /> Skills
           </button>
-          <button onClick={() => scrollTo("licenses-certifications-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("licenses-certifications-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Award size={16} className="text-[#781c1c]" /> Certifications
           </button>
-          <button onClick={() => scrollTo("languages-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("languages-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Globe size={16} className="text-[#781c1c]" /> Languages known
           </button>
-          <button onClick={() => scrollTo("test-scores-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("test-scores-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Award size={16} className="text-[#781c1c]" /> Test Scores
           </button>
-          <button onClick={() => scrollTo("patents-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("patents-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <FileText size={16} className="text-[#781c1c]" /> Patents
           </button>
-          <button onClick={() => scrollTo("media-handles-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("media-handles-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <Link size={16} className="text-[#781c1c]" /> Media Handles
           </button>
-          <button onClick={() => scrollTo("resume-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+          <button onClick={() => scrollTo("resume-section")} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
             <FileText size={16} className="text-[#781c1c]" /> Resume
           </button>
 
@@ -1099,13 +1099,13 @@ Report Generated: ${new Date().toLocaleDateString()}
               } else {
                 alert("Please save your Header details first.");
               }
-            }} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+            }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
               <Eye size={16} className="text-emerald-400" /> View Public Portfolio
             </button>
-            <button onClick={() => window.location.href = "/search"} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+            <button onClick={() => window.location.href = "/search"} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
               <Globe size={16} className="text-gray-400" /> Search Students
             </button>
-            <button onClick={() => window.location.href = "/leaderboard"} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
+            <button onClick={() => window.location.href = "/leaderboard"} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"}`}>
               <Trophy size={16} className="text-gray-400" /> Leaderboard
             </button>
           </div>
@@ -1127,7 +1127,8 @@ Report Generated: ${new Date().toLocaleDateString()}
         {/* HEADER BAR */}
         <div className="flex justify-between items-center pb-6 border-b border-white/10">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight">Student Dashboard</h2>
+            <span className="text-[10px] uppercase font-mono font-black tracking-widest text-[#781c1c] block mb-1">Student Placement Directory</span>
+            <h2 className="font-serif text-3xl font-extrabold tracking-tight text-[#18233c]">Student Dashboard</h2>
             <p className={`text-xs mt-1 ${themeMode === "dark" ? "text-gray-400" : "text-slate-500"}`}>
               Configure and showcase your portfolio variables according to MCC standards.
             </p>
@@ -1182,7 +1183,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="header-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <User size={22} /> Section 1: Header Section Details
           </h3>
 
@@ -1191,7 +1192,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl p-5 flex flex-col justify-center gap-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-xs font-semibold opacity-60">Profile Photo (JPG / PNG)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Profile Photo (JPG / PNG)</label>
               <div className="flex items-center gap-4 mt-2">
                 <input
                   type="file"
@@ -1217,7 +1218,7 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             {/* Inputs */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Full Name</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Full Name</label>
               <input
                 type="text"
                 placeholder="Student Full Name"
@@ -1230,7 +1231,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Course & Year</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Course & Year</label>
               <input
                 type="text"
                 placeholder="e.g. B.Sc. Computer Science - III Year"
@@ -1243,7 +1244,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Current Location</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Current Location</label>
               <input
                 type="text"
                 placeholder="e.g. Chennai, Tamil Nadu, India"
@@ -1256,7 +1257,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Contact Email</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Contact Email</label>
               <input
                 type="email"
                 placeholder="Email Address"
@@ -1267,7 +1268,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Contact Phone</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Contact Phone</label>
               <input
                 type="text"
                 placeholder="e.g. +91 98765 43210"
@@ -1280,7 +1281,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2 md:col-span-2">
-              <label className="text-xs font-semibold opacity-60">LinkedIn Profile URL</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">LinkedIn Profile URL</label>
               <input
                 type="text"
                 placeholder="https://linkedin.com/in/username"
@@ -1344,13 +1345,13 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="about-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <FileText size={22} /> Section 2: About Section
           </h3>
 
           <div className="space-y-4">
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Short bio / Professional Summary</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Short bio / Professional Summary</label>
               <textarea
                 placeholder="A compelling, short biography to pitch yourself to employers and academies..."
                 value={bio}
@@ -1362,7 +1363,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Personal Journey Story (Optional)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Personal Journey Story (Optional)</label>
               <textarea
                 placeholder="Share your personal background or story of how you entered this field..."
                 value={personalStory}
@@ -1374,7 +1375,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Statement of Purpose (SOP) / Career Intentions (Optional)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Statement of Purpose (SOP) / Career Intentions (Optional)</label>
               <textarea
                 placeholder="Write your long-term career aspirations and objectives..."
                 value={sop}
@@ -1402,7 +1403,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="experience-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Briefcase size={22} /> Section 3: Experience
           </h3>
 
@@ -1553,7 +1554,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="academic-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Award size={22} /> Section 4: Academic Details
           </h3>
 
@@ -1621,7 +1622,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 md:col-span-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-xs font-semibold opacity-60">Transcript / Marksheet Proof (PDF / Image)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Transcript / Marksheet Proof (PDF / Image)</label>
               <div className="flex items-center gap-4 mt-1">
                 <input
                   type="file"
@@ -1692,7 +1693,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="achievements-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Trophy size={22} /> Section 5: Achievements
           </h3>
 
@@ -1732,7 +1733,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-xs font-semibold opacity-60">Certificate / Proof File (PDF / Image)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Certificate / Proof File (PDF / Image)</label>
               <div className="flex items-center gap-4 mt-1">
                 <input
                   type="file"
@@ -1815,7 +1816,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="projects-research-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <GitBranch size={22} /> Section 6: Projects & Research
           </h3>
 
@@ -1963,7 +1964,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="skills-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Code size={22} /> Section 7: Skills
           </h3>
 
@@ -2044,7 +2045,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="licenses-certifications-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Award size={22} /> Section 8: Licenses & Certifications
           </h3>
 
@@ -2095,7 +2096,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 md:col-span-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-xs font-semibold opacity-60">Certificate PDF / Image Proof</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Certificate PDF / Image Proof</label>
               <div className="flex items-center gap-4 mt-1">
                 <input
                   type="file"
@@ -2169,12 +2170,12 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="languages-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Globe size={22} /> Section 9: Languages known
           </h3>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold opacity-60">List the languages you know (comma separated)</label>
+            <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">List the languages you know (comma separated)</label>
             <input
               type="text"
               placeholder="e.g. English (Fluent), Tamil (Native), Hindi (Intermediate)"
@@ -2202,12 +2203,12 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="test-scores-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Award size={22} /> Section 10: Test Scores
           </h3>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold opacity-60">Enter standardized test scores (IELTS, GRE, GATE, TOEFL, etc.)</label>
+            <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Enter standardized test scores (IELTS, GRE, GATE, TOEFL, etc.)</label>
             <textarea
               placeholder="e.g. IELTS Academic: 8.0 Band, GRE: 325 (Quant: 168, Verbal: 157, AWA: 4.5)"
               value={testScores}
@@ -2234,12 +2235,12 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="patents-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <FileText size={22} /> Section 11: Patents
           </h3>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold opacity-60">List any patents filed, published, or granted</label>
+            <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">List any patents filed, published, or granted</label>
             <textarea
               placeholder="e.g. Patent Title: Smart Agricultural Watering System, App No: 20264102931A (Published 2026, Indian Patent Office)"
               value={patents}
@@ -2266,13 +2267,13 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="media-handles-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <Link size={22} /> Section 12: Other Media handles
           </h3>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Instagram Handle / URL</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Instagram Handle / URL</label>
               <input
                 type="text"
                 placeholder="https://instagram.com/username"
@@ -2285,7 +2286,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold opacity-60">Blog Website URL</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Blog Website URL</label>
               <input
                 type="text"
                 placeholder="https://medium.com/@username or personal blog"
@@ -2298,7 +2299,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2 md:col-span-2">
-              <label className="text-xs font-semibold opacity-60">Other handles / URLs (e.g. Behance, YouTube, GitHub, Twitter)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Other handles / URLs (e.g. Behance, YouTube, GitHub, Twitter)</label>
               <input
                 type="text"
                 placeholder="YouTube: channel_url, Twitter: twitter_url, etc."
@@ -2327,7 +2328,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="resume-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
+          <h3 className="font-serif text-2xl font-black mb-4 flex items-center gap-2 text-[#18233c] border-b border-[#781c1c]/10 pb-3">
             <FileText size={22} /> Section 13: Resume
           </h3>
 
@@ -2345,7 +2346,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-xs font-semibold opacity-60">Upload Resume (PDF only)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Upload Resume (PDF only)</label>
               <div className="flex items-center gap-4 mt-1">
                 <input
                   type="file"

@@ -572,7 +572,7 @@ export default function AdminPage() {
           SIDEBAR NAVIGATION
           ========================================== */}
       <div className={`w-72 border-r relative z-20 flex flex-col justify-between shrink-0 h-screen sticky top-0 transition-colors duration-300 ${
-        themeMode === "dark" ? "bg-[#09090d]/90 border-white/5" : "bg-white border-slate-200"
+        themeMode === "dark" ? "bg-[#09090d]/90 border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white shadow-xl"
       }`}>
         <div>
           {/* Logo & Console Title */}
@@ -628,7 +628,7 @@ export default function AdminPage() {
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
-                  <Icon size={16} className={isActive ? (themeMode === "dark" ? "text-black" : "text-white") : "text-gray-400"} />
+                  <Icon size={16} className={isActive ? (themeMode === "dark" ? "text-black" : "text-white") : (themeMode === "dark" ? "text-gray-400" : "text-slate-300")} />
                   {tab.label}
                 </button>
               );
