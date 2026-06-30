@@ -547,8 +547,8 @@ export default function AdminPage() {
 
   if (loading && !metrics) {
     return (
-      <div className="min-h-screen bg-[#050507] text-[#f3f4f6] flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
+      <div className="min-h-screen bg-[#0d0d12] text-[#f3f4f6] flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-2 border-[#781c1c] border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-gray-400 text-sm font-semibold tracking-widest uppercase animate-pulse">
           Loading MCC Admin Console...
         </p>
@@ -558,7 +558,7 @@ export default function AdminPage() {
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden transition-colors duration-300 ${
-      themeMode === "dark" ? "bg-[#050507] text-[#f3f4f6]" : "bg-[#f8fafc] text-[#0f172a]"
+      themeMode === "dark" ? "bg-[#0d0d12] text-[#f3f4f6]" : "bg-[#fcfaf6] text-[#0f172a]"
     }`}>
       {/* Background radial overlays */}
       {themeMode === "dark" && (
@@ -579,14 +579,14 @@ export default function AdminPage() {
           <div className={`p-6 border-b flex items-center gap-3 ${
             themeMode === "dark" ? "border-white/5" : "border-slate-200"
           }`}>
-            <div className="w-10 h-10 rounded-xl bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center shrink-0">
-              <Shield size={20} className="text-[#a78bfa]" />
+            <div className="w-10 h-10 rounded-xl bg-[#781c1c]/10 border border-[#781c1c]/20 flex items-center justify-center shrink-0">
+              <Shield size={20} className="text-[#781c1c]" />
             </div>
             <div>
               <h1 className={`font-extrabold text-sm tracking-tight leading-tight ${themeMode === "dark" ? "text-white" : "text-slate-900"}`}>
                 MCC Portfolio
               </h1>
-              <span className="text-[9px] uppercase font-mono tracking-widest text-[#a78bfa] font-bold block">
+              <span className="text-[9px] uppercase font-mono tracking-widest text-[#781c1c] font-bold block">
                 Super Admin Console
               </span>
             </div>
@@ -650,7 +650,7 @@ export default function AdminPage() {
             }`}
           >
             <span className="flex items-center gap-2">
-              {themeMode === "dark" ? <Sun size={14} className="text-amber-405" /> : <Moon size={14} className="text-indigo-500" />}
+              {themeMode === "dark" ? <Sun size={14} className="text-amber-405" /> : <Moon size={14} className="text-[#781c1c]" />}
               {themeMode === "dark" ? "Light Mode" : "Dark Mode"}
             </span>
             <span className="text-[9px] uppercase font-mono tracking-wider opacity-60">Theme</span>
@@ -713,9 +713,9 @@ export default function AdminPage() {
             {/* Global Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
-                { label: "Students", val: metrics.totalStudents, icon: Users, color: "text-indigo-400" },
+                { label: "Students", val: metrics.totalStudents, icon: Users, color: "text-[#781c1c]" },
                 { label: "Projects", val: metrics.totalProjects, icon: Code, color: "text-pink-400" },
-                { label: "Skills", val: metrics.totalSkills, icon: Layers, color: "text-purple-400" },
+                { label: "Skills", val: metrics.totalSkills, icon: Layers, color: "text-[#781c1c]" },
                 { label: "Achievements", val: metrics.totalAchievements, icon: Trophy, color: "text-amber-400" },
                 { label: "Hackathons", val: metrics.totalHackathons, icon: Activity, color: "text-emerald-400" },
                 { label: "Papers", val: metrics.totalResearchPapers, icon: BookOpen, color: "text-cyan-400" }
@@ -783,12 +783,12 @@ export default function AdminPage() {
                       <div
                         key={student.id}
                         className={`border rounded-2xl p-5 transition-all duration-300 flex flex-col justify-between ${
-                          themeMode === "dark" ? "bg-[#121217]/50 border-white/5 hover:border-indigo-500/20" : "bg-slate-50 border-slate-200 hover:border-indigo-500/25 hover:shadow-md"
+                          themeMode === "dark" ? "bg-[#121217]/50 border-white/5 hover:border-[#781c1c]/20" : "bg-slate-50 border-slate-200 hover:border-[#781c1c]/25 hover:shadow-md"
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between mb-3.5 flex-wrap gap-2">
-                            <span className="text-[10px] uppercase font-mono tracking-widest text-[#a78bfa] font-bold bg-[#a78bfa]/10 px-2 py-0.5 rounded border border-[#a78bfa]/15">
+                            <span className="text-[10px] uppercase font-mono tracking-widest text-[#781c1c] font-bold bg-[#a78bfa]/10 px-2 py-0.5 rounded border border-[#a78bfa]/15">
                               {student.department || "No Department"}
                             </span>
                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
@@ -892,7 +892,7 @@ export default function AdminPage() {
                   });
                   setIsCreateModalOpen(true);
                 }}
-                className="inline-flex items-center gap-2 px-4 h-[40px] rounded-xl text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-600/10"
+                className="inline-flex items-center gap-2 px-4 h-[40px] rounded-xl text-xs bg-[#781c1c] hover:bg-[#5f1515] text-white font-bold transition shadow-lg shadow-[#781c1c]/10"
               >
                 <Plus size={14} /> Add Student Account
               </button>
@@ -925,7 +925,7 @@ export default function AdminPage() {
                           <div className="flex items-center gap-2">
                             <span>{student.fullName}</span>
                             {student.isAlumni && (
-                              <span className="inline-flex items-center text-[9px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20 font-bold">
+                              <span className="inline-flex items-center text-[9px] bg-[#781c1c]/10 text-[#781c1c] px-2 py-0.5 rounded-full border border-[#781c1c]/20 font-bold">
                                 Alumni '{student.graduationYear || "Grad"}'
                               </span>
                             )}
@@ -951,7 +951,7 @@ export default function AdminPage() {
                             <button
                               onClick={() => openEditModal(student)}
                               className={`p-2 rounded border transition ${
-                                themeMode === "dark" ? "bg-white/5 border-white/10 text-[#a78bfa] hover:bg-white/10" : "bg-white border-slate-200 text-indigo-600 hover:bg-slate-100"
+                                themeMode === "dark" ? "bg-white/5 border-white/10 text-[#781c1c] hover:bg-white/10" : "bg-white border-slate-200 text-[#18233c] hover:bg-slate-100"
                               }`}
                               title="Edit details"
                             >
@@ -1003,7 +1003,7 @@ export default function AdminPage() {
                       type="text"
                       value={institution.name}
                       onChange={(e) => setInstitution({ ...institution, name: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1014,7 +1014,7 @@ export default function AdminPage() {
                       type="text"
                       value={institution.code}
                       onChange={(e) => setInstitution({ ...institution, code: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1027,7 +1027,7 @@ export default function AdminPage() {
                     rows={4}
                     value={institution.description}
                     onChange={(e) => setInstitution({ ...institution, description: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition resize-none ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition resize-none ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -1040,7 +1040,7 @@ export default function AdminPage() {
                       type="email"
                       value={institution.contactEmail}
                       onChange={(e) => setInstitution({ ...institution, contactEmail: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1051,7 +1051,7 @@ export default function AdminPage() {
                       type="text"
                       value={institution.contactPhone}
                       onChange={(e) => setInstitution({ ...institution, contactPhone: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1065,7 +1065,7 @@ export default function AdminPage() {
                       type="text"
                       value={institution.website}
                       onChange={(e) => setInstitution({ ...institution, website: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1076,7 +1076,7 @@ export default function AdminPage() {
                       type="text"
                       value={institution.logoUrl}
                       onChange={(e) => setInstitution({ ...institution, logoUrl: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     />
@@ -1089,7 +1089,7 @@ export default function AdminPage() {
                     type="text"
                     value={institution.address}
                     onChange={(e) => setInstitution({ ...institution, address: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -1097,7 +1097,7 @@ export default function AdminPage() {
 
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/10"
+                  className="px-6 py-3 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition shadow-lg shadow-[#781c1c]/10"
                 >
                   Save Configuration
                 </button>
@@ -1119,13 +1119,13 @@ export default function AdminPage() {
                   placeholder="New department name..."
                   value={newDeptName}
                   onChange={(e) => setNewDeptName(e.target.value)}
-                  className={`flex-1 border rounded-xl px-3 py-2.5 text-xs outline-none focus:border-indigo-500 transition ${
+                  className={`flex-1 border rounded-xl px-3 py-2.5 text-xs outline-none focus:border-[#781c1c] transition ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shrink-0"
+                  className="px-4 py-2.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition shrink-0"
                 >
                   Add
                 </button>
@@ -1173,7 +1173,7 @@ export default function AdminPage() {
                     }`} title={dept.department}>
                       {dept.department}
                     </h4>
-                    <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded shrink-0">
+                    <span className="text-[10px] font-mono font-bold text-[#781c1c] bg-[#781c1c]/10 px-2 py-0.5 rounded shrink-0">
                       {dept.studentCount} Students
                     </span>
                   </div>
@@ -1271,7 +1271,7 @@ export default function AdminPage() {
                         themeMode === "dark" ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-100"
                       }`}>
                         <span className="text-gray-400 text-[10px] uppercase font-mono tracking-wider font-bold">Global Higher Education</span>
-                        <div className="text-3xl font-black mt-1 text-purple-400">
+                        <div className="text-3xl font-black mt-1 text-[#781c1c]">
                           {higherEdAlumni.length} <span className="text-xs text-gray-500 font-normal">({higherEdRate}%)</span>
                         </div>
                       </div>
@@ -1306,7 +1306,7 @@ export default function AdminPage() {
                           <div className={`w-full h-3 rounded-full overflow-hidden ${
                             themeMode === "dark" ? "bg-white/5" : "bg-slate-100"
                           }`}>
-                            <div className="bg-gradient-to-r from-purple-400 to-indigo-600 h-full rounded-full" style={{ width: `${higherEdRate}%` }} />
+                            <div className="bg-gradient-to-r from-[#781c1c] to-[#18233c] h-full rounded-full" style={{ width: `${higherEdRate}%` }} />
                           </div>
                         </div>
 
@@ -1415,7 +1415,7 @@ export default function AdminPage() {
                         <td className="p-4">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold ${
                             user.role === "Admin"
-                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/25"
+                              ? "bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/25"
                               : "bg-blue-500/10 text-blue-400 border border-blue-500/25"
                           }`}>
                             <Shield size={10} />
@@ -1428,7 +1428,7 @@ export default function AdminPage() {
                             className={`px-3 py-1.5 rounded-lg font-bold text-[10px] transition ${
                               user.role === "Admin"
                                 ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/25"
-                                : "bg-purple-600 hover:bg-purple-700 text-white"
+                                : "bg-[#781c1c] hover:bg-[#5f1515] text-white"
                             }`}
                           >
                             {user.role === "Admin" ? "Demote to Student" : "Promote to Admin"}
@@ -1453,14 +1453,14 @@ export default function AdminPage() {
                 className={`border rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 relative overflow-hidden group ${
                   theme.isActive
                     ? themeMode === "dark"
-                      ? "bg-[#0b0b0f] border-white/5 hover:border-indigo-500/20"
-                      : "bg-white border-slate-200 hover:border-indigo-500/30 hover:shadow-lg"
+                      ? "bg-[#0b0b0f] border-white/5 hover:border-[#781c1c]/20"
+                      : "bg-white border-slate-200 hover:border-[#781c1c]/30 hover:shadow-lg"
                     : "border-rose-500/20 grayscale opacity-60 bg-slate-50"
                 }`}
               >
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-[10px] uppercase font-mono tracking-widest text-[#a78bfa] font-bold bg-[#a78bfa]/10 px-2.5 py-1 rounded-md border border-[#a78bfa]/15">
+                    <span className="text-[10px] uppercase font-mono tracking-widest text-[#781c1c] font-bold bg-[#a78bfa]/10 px-2.5 py-1 rounded-md border border-[#a78bfa]/15">
                       {theme.studentCount} Students
                     </span>
 
@@ -1476,7 +1476,7 @@ export default function AdminPage() {
                     </button>
                   </div>
 
-                  <h4 className={`text-lg font-bold mb-2 leading-tight group-hover:text-indigo-400 transition-colors ${
+                  <h4 className={`text-lg font-bold mb-2 leading-tight group-hover:text-[#781c1c] transition-colors ${
                     themeMode === "dark" ? "text-white" : "text-slate-900"
                   }`}>
                     {theme.displayName}
@@ -1490,7 +1490,7 @@ export default function AdminPage() {
                     themeMode === "dark" ? "border-white/5" : "border-slate-200"
                   }`}>
                     <h5 className={`font-bold uppercase tracking-wider text-[9px] ${
-                      themeMode === "dark" ? "text-purple-400" : "text-indigo-600"
+                      themeMode === "dark" ? "text-[#781c1c]" : "text-[#18233c]"
                     }`}>
                       🎨 Dynamic Style Overrides
                     </h5>
@@ -1686,13 +1686,13 @@ export default function AdminPage() {
                   <div
                     key={idx}
                     className={`p-4 border rounded-2xl transition duration-200 ${
-                      themeMode === "dark" ? "bg-white/5 border-white/5 hover:border-indigo-500/25" : "bg-slate-50 border-slate-250 hover:bg-slate-100 hover:shadow-sm"
+                      themeMode === "dark" ? "bg-white/5 border-white/5 hover:border-[#781c1c]/25" : "bg-slate-50 border-slate-250 hover:bg-slate-100 hover:shadow-sm"
                     }`}
                   >
                     <span className={`text-xs font-bold block mb-1.5 ${themeMode === "dark" ? "text-white" : "text-slate-800"}`}>{s.skill}</span>
                     <div className="flex justify-between items-center text-[10px] text-gray-400 font-semibold">
                       <span>Shared by</span>
-                      <span className="text-[#a78bfa] font-mono font-bold">{s.count} student(s)</span>
+                      <span className="text-[#781c1c] font-mono font-bold">{s.count} student(s)</span>
                     </div>
                   </div>
                 ))}
@@ -1722,7 +1722,7 @@ export default function AdminPage() {
                     <select
                       value={notifForm.type}
                       onChange={(e) => setNotifForm({ ...notifForm, type: e.target.value })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     >
@@ -1737,7 +1737,7 @@ export default function AdminPage() {
                     <select
                       value={notifForm.userId}
                       onChange={(e) => setNotifForm({ ...notifForm, userId: Number(e.target.value) })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     >
@@ -1760,7 +1760,7 @@ export default function AdminPage() {
                     placeholder="E.g., Submission Deadline Extended"
                     value={notifForm.title}
                     onChange={(e) => setNotifForm({ ...notifForm, title: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -1773,7 +1773,7 @@ export default function AdminPage() {
                     placeholder="Enter announcement description..."
                     value={notifForm.message}
                     onChange={(e) => setNotifForm({ ...notifForm, message: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 transition resize-none ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition resize-none ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -1781,7 +1781,7 @@ export default function AdminPage() {
 
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition"
+                  className="px-6 py-3 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition"
                 >
                   Send Announcement
                 </button>
@@ -1910,8 +1910,8 @@ export default function AdminPage() {
               themeMode === "dark" ? "bg-[#0b0b0f] border-white/5" : "bg-white border-slate-200"
             }`}>
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                  <Download size={22} className="text-indigo-400" />
+                <div className="w-12 h-12 rounded-2xl bg-[#781c1c]/10 border border-[#781c1c]/20 flex items-center justify-center">
+                  <Download size={22} className="text-[#781c1c]" />
                 </div>
                 <h3 className={`text-xl font-bold ${themeMode === "dark" ? "text-white" : "text-slate-900"}`}>Download Database Backup</h3>
                 <p className="text-gray-400 text-xs leading-relaxed">
@@ -1974,7 +1974,7 @@ export default function AdminPage() {
           MODAL: CREATE STUDENT
           ========================================== */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0d0d12]/75 backdrop-blur-sm">
           <div className={`border rounded-3xl p-8 w-full max-w-lg shadow-2xl relative ${
             themeMode === "dark" ? "bg-[#0b0b0f] border-white/10" : "bg-white border-slate-200"
           }`}>
@@ -1990,7 +1990,7 @@ export default function AdminPage() {
                     required
                     value={studentForm.fullName}
                     onChange={(e) => setStudentForm({ ...studentForm, fullName: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -2002,7 +2002,7 @@ export default function AdminPage() {
                     required
                     value={studentForm.registerNumber}
                     onChange={(e) => setStudentForm({ ...studentForm, registerNumber: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -2016,7 +2016,7 @@ export default function AdminPage() {
                   required
                   value={studentForm.email}
                   onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 />
@@ -2029,7 +2029,7 @@ export default function AdminPage() {
                   required
                   value={studentForm.password}
                   onChange={(e) => setStudentForm({ ...studentForm, password: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 />
@@ -2040,7 +2040,7 @@ export default function AdminPage() {
                 <select
                   value={studentForm.department}
                   onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 >
@@ -2067,7 +2067,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/10"
+                  className="px-5 py-2.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition shadow-lg shadow-[#781c1c]/10"
                 >
                   Create Student
                 </button>
@@ -2081,7 +2081,7 @@ export default function AdminPage() {
           MODAL: EDIT STUDENT
           ========================================== */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0d0d12]/75 backdrop-blur-sm">
           <div className={`border rounded-3xl p-8 w-full max-w-lg shadow-2xl relative ${
             themeMode === "dark" ? "bg-[#0b0b0f] border-white/10" : "bg-white border-slate-200"
           }`}>
@@ -2097,7 +2097,7 @@ export default function AdminPage() {
                     required
                     value={studentForm.fullName}
                     onChange={(e) => setStudentForm({ ...studentForm, fullName: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -2109,7 +2109,7 @@ export default function AdminPage() {
                     required
                     value={studentForm.registerNumber}
                     onChange={(e) => setStudentForm({ ...studentForm, registerNumber: e.target.value })}
-                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                    className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                       themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                     }`}
                   />
@@ -2123,7 +2123,7 @@ export default function AdminPage() {
                   required
                   value={studentForm.email}
                   onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 />
@@ -2134,7 +2134,7 @@ export default function AdminPage() {
                 <select
                   value={studentForm.department}
                   onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })}
-                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-indigo-500 ${
+                  className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                   }`}
                 >
@@ -2161,7 +2161,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/10"
+                  className="px-5 py-2.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition shadow-lg shadow-[#781c1c]/10"
                 >
                   Save Changes
                 </button>

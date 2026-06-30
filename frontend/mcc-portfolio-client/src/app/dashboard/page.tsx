@@ -981,7 +981,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           card: "bg-white border border-neutral-100 p-6 rounded-2xl text-neutral-800 font-sans shadow-md",
           badge: "inline-block px-2.5 py-0.5 bg-violet-50 text-violet-700 text-[10px] font-bold rounded-full border border-violet-100",
           title: "text-neutral-900 font-black uppercase text-sm tracking-wider pb-1 border-b-2 border-neutral-150",
-          accentText: "text-purple-500 font-bold text-xs",
+          accentText: "text-[#781c1c] font-bold text-xs",
           borderAccent: "border-l-3 border-violet-500"
         };
       case "Creative":
@@ -994,8 +994,8 @@ Report Generated: ${new Date().toLocaleDateString()}
         };
       case "AIFuturistic":
         return {
-          card: "bg-black border border-[#00ffcc]/25 p-6 rounded-xl text-gray-300 font-mono shadow-[0_0_15px_rgba(0,255,204,0.05)]",
-          badge: "inline-block px-2 py-0.5 bg-black text-[#00ffcc] text-[10px] font-bold rounded border border-[#00ffcc]/20",
+          card: "bg-[#0d0d12] border border-[#00ffcc]/25 p-6 rounded-xl text-gray-300 font-mono shadow-[0_0_15px_rgba(0,255,204,0.05)]",
+          badge: "inline-block px-2 py-0.5 bg-[#0d0d12] text-[#00ffcc] text-[10px] font-bold rounded border border-[#00ffcc]/20",
           title: "text-[#00ffcc] font-bold uppercase text-sm tracking-widest pb-1 border-b border-[#00ffcc]/15",
           accentText: "text-cyan-400 font-bold text-xs",
           borderAccent: "border-l-3 border-[#00ffcc]"
@@ -1027,7 +1027,7 @@ Report Generated: ${new Date().toLocaleDateString()}
 
   return (
     <div className={`min-h-screen flex transition-colors duration-300 ${
-      themeMode === "dark" ? "bg-black text-white" : "bg-[#f8fafc] text-[#0f172a]"
+      themeMode === "dark" ? "bg-[#0d0d12] text-white" : "bg-[#fcfaf6] text-[#0f172a]"
     }`}>
       
       {/* SIDEBAR NAVIGATION */}
@@ -1035,7 +1035,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200"
       }`}>
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#781c1c] to-[#18233c] bg-clip-text text-transparent">
             MCC Dashboard
           </h1>
           <button
@@ -1049,47 +1049,47 @@ Report Generated: ${new Date().toLocaleDateString()}
         {/* 13 SECTIONS LINKS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-thin">
           <button onClick={() => scrollTo("header-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <User size={16} className="text-purple-400" /> Header Section
+            <User size={16} className="text-[#781c1c]" /> Header Section
           </button>
           <button onClick={() => scrollTo("about-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <FileText size={16} className="text-purple-400" /> About Section
+            <FileText size={16} className="text-[#781c1c]" /> About Section
           </button>
           <button onClick={() => scrollTo("experience-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Briefcase size={16} className="text-purple-400" /> Experience
+            <Briefcase size={16} className="text-[#781c1c]" /> Experience
           </button>
           <button onClick={() => scrollTo("academic-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Award size={16} className="text-purple-400" /> Academic Details
+            <Award size={16} className="text-[#781c1c]" /> Academic Details
           </button>
           <button onClick={() => scrollTo("achievements-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Trophy size={16} className="text-purple-400" /> Achievements
+            <Trophy size={16} className="text-[#781c1c]" /> Achievements
           </button>
           <button onClick={() => scrollTo("projects-research-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <GitBranch size={16} className="text-purple-400" /> Projects & Research
+            <GitBranch size={16} className="text-[#781c1c]" /> Projects & Research
           </button>
           <button onClick={() => scrollTo("skills-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Code size={16} className="text-purple-400" /> Skills
+            <Code size={16} className="text-[#781c1c]" /> Skills
           </button>
           <button onClick={() => scrollTo("licenses-certifications-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Award size={16} className="text-purple-400" /> Certifications
+            <Award size={16} className="text-[#781c1c]" /> Certifications
           </button>
           <button onClick={() => scrollTo("languages-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Globe size={16} className="text-purple-400" /> Languages known
+            <Globe size={16} className="text-[#781c1c]" /> Languages known
           </button>
           <button onClick={() => scrollTo("test-scores-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Award size={16} className="text-purple-400" /> Test Scores
+            <Award size={16} className="text-[#781c1c]" /> Test Scores
           </button>
           <button onClick={() => scrollTo("patents-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <FileText size={16} className="text-purple-400" /> Patents
+            <FileText size={16} className="text-[#781c1c]" /> Patents
           </button>
           <button onClick={() => scrollTo("media-handles-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <Link size={16} className="text-purple-400" /> Media Handles
+            <Link size={16} className="text-[#781c1c]" /> Media Handles
           </button>
           <button onClick={() => scrollTo("resume-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium text-left">
-            <FileText size={16} className="text-purple-400" /> Resume
+            <FileText size={16} className="text-[#781c1c]" /> Resume
           </button>
 
           <div className="pt-4 border-t border-white/5 space-y-1">
-            <button onClick={() => scrollTo("ai-advisor-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-sm font-semibold text-left">
+            <button onClick={() => scrollTo("ai-advisor-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl bg-[#781c1c]/10 hover:bg-[#781c1c]/20 text-[#781c1c] text-sm font-semibold text-left">
               <Sparkles size={16} /> AI Career Advisor
             </button>
             <button onClick={() => {
@@ -1141,7 +1141,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             >
               <Bell size={18} />
               {notifications.some(n => !n.isRead) && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-purple-500 rounded-full" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-[#781c1c] rounded-full" />
               )}
             </button>
             {showNotifications && (
@@ -1159,7 +1159,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                         key={n.id}
                         onClick={() => !n.isRead && markNotificationAsRead(n.id)}
                         className={`p-3 rounded-xl border transition text-left cursor-pointer ${
-                          n.isRead ? "bg-white/[0.02] border-white/5 opacity-60" : "bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/15"
+                          n.isRead ? "bg-white/[0.02] border-white/5 opacity-60" : "bg-[#781c1c]/10 border-[#781c1c]/20 hover:bg-[#781c1c]/15"
                         }`}
                       >
                         <span className="font-semibold text-xs block leading-tight">{n.title}</span>
@@ -1182,7 +1182,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="header-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <User size={22} /> Section 1: Header Section Details
           </h3>
 
@@ -1202,13 +1202,13 @@ Report Generated: ${new Date().toLocaleDateString()}
                 />
                 <label
                   htmlFor="profile-image-upload"
-                  className="bg-purple-600 hover:bg-purple-700 px-5 py-2.5 rounded-xl cursor-pointer text-xs font-bold transition text-white"
+                  className="bg-[#781c1c] hover:bg-[#5f1515] px-5 py-2.5 rounded-xl cursor-pointer text-xs font-bold transition text-white"
                 >
                   {uploadingField === "Profile Image" ? "Uploading..." : "Upload Photo"}
                 </label>
                 {profileImageUrl && (
                   <div className="flex items-center gap-3">
-                    <img src={profileImageUrl} className="w-10 h-10 object-cover rounded-full border border-purple-500" alt="Preview" />
+                    <img src={profileImageUrl} className="w-10 h-10 object-cover rounded-full border border-[#781c1c]" alt="Preview" />
                     <span className="text-green-400 text-xs font-bold flex items-center gap-1"><CheckCircle size={14} /> Uploaded</span>
                   </div>
                 )}
@@ -1295,7 +1295,7 @@ Report Generated: ${new Date().toLocaleDateString()}
 
           {/* DYNAMIC THEME ENGINE IN HEADER */}
           <div className="mt-8 pt-8 border-t border-dashed border-white/10">
-            <h4 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+            <h4 className="text-sm font-bold text-[#781c1c] mb-4 flex items-center gap-2">
               <Sparkles size={16} /> Select Portfolio Theme Style
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -1309,7 +1309,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     onClick={() => setSelectedTheme(themeId)}
                     className={`p-4 rounded-xl border text-left transition flex flex-col justify-between h-28 ${
                       selectedTheme === themeId
-                        ? "border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/10"
+                        ? "border-[#781c1c] bg-[#781c1c]/10 shadow-lg shadow-[#781c1c]/10"
                         : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
                   >
@@ -1318,7 +1318,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                       <span className="text-[10px] opacity-60 mt-1 block leading-tight truncate">{t.description}</span>
                     </div>
                     {selectedTheme === themeId && (
-                      <span className="text-purple-400 text-[10px] font-semibold flex items-center gap-1">
+                      <span className="text-[#781c1c] text-[10px] font-semibold flex items-center gap-1">
                         <CheckCircle size={10} /> Active
                       </span>
                     )}
@@ -1331,7 +1331,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition"
+              className="bg-gradient-to-r from-[#781c1c] to-[#18233c] hover:opacity-90 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition"
             >
               Save Header Settings
             </button>
@@ -1344,7 +1344,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="about-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <FileText size={22} /> Section 2: About Section
           </h3>
 
@@ -1389,7 +1389,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition"
             >
               Save About Section
             </button>
@@ -1402,7 +1402,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="experience-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Briefcase size={22} /> Section 3: Experience
           </h3>
 
@@ -1488,7 +1488,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 id="expIsCurrent"
                 checked={expIsCurrent}
                 onChange={(e) => setExpIsCurrent(e.target.checked)}
-                className="w-4 h-4 rounded text-purple-600 accent-purple-500"
+                className="w-4 h-4 rounded text-purple-600 accent-[#781c1c]"
               />
               <label htmlFor="expIsCurrent" className="text-sm cursor-pointer select-none">I currently work here</label>
             </div>
@@ -1514,7 +1514,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             )}
             <button
               onClick={addExperience}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs"
             >
               {editingExpId ? "Update Experience" : "Add Experience"}
             </button>
@@ -1528,7 +1528,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[9px] font-bold uppercase mb-2">
                       {exp.category}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{exp.title}</h4>
@@ -1553,7 +1553,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="academic-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Award size={22} /> Section 4: Academic Details
           </h3>
 
@@ -1633,13 +1633,13 @@ Report Generated: ${new Date().toLocaleDateString()}
                 {!academicAttachment ? (
                   <label
                     htmlFor="academic-file-input"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
+                    className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
                   >
                     {uploadingField === "Academic Proof" ? "Uploading..." : "Upload Proof Document"}
                   </label>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-xl border border-purple-500/20">
+                    <span className="flex items-center gap-1.5 text-xs text-[#781c1c] font-bold bg-[#781c1c]/10 px-3 py-1.5 rounded-xl border border-[#781c1c]/20">
                       <FileText size={14} /> Document Attached
                     </span>
                     <button onClick={() => setAcademicAttachment("")} className="text-xs text-red-400 font-semibold underline">Remove</button>
@@ -1653,7 +1653,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingAcademicId && (
               <button onClick={cancelEditAcademicRecord} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addAcademicRecord} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addAcademicRecord} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingAcademicId ? "Update Record" : "Add Record"}
             </button>
           </div>
@@ -1677,7 +1677,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                   </div>
                 </div>
                 {rec.attachmentUrl && (
-                  <a href={rec.attachmentUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-purple-400 hover:underline font-bold mt-3">
+                  <a href={rec.attachmentUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-[#781c1c] hover:underline font-bold mt-3">
                     <ExternalLink size={10} /> View Proof Document
                   </a>
                 )}
@@ -1692,7 +1692,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="achievements-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Trophy size={22} /> Section 5: Achievements
           </h3>
 
@@ -1744,13 +1744,13 @@ Report Generated: ${new Date().toLocaleDateString()}
                 {!achievementUrl ? (
                   <label
                     htmlFor="achievement-upload"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
+                    className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
                   >
                     {uploadingField === "Achievement" ? "Uploading..." : "Upload Certificate"}
                   </label>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-xl border border-purple-500/20">
+                    <span className="flex items-center gap-1.5 text-xs text-[#781c1c] font-bold bg-[#781c1c]/10 px-3 py-1.5 rounded-xl border border-[#781c1c]/20">
                       <FileText size={14} /> Uploaded
                     </span>
                     <button onClick={() => setAchievementUrl("")} className="text-xs text-red-400 font-semibold underline">Remove</button>
@@ -1773,7 +1773,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingAchId && (
               <button onClick={cancelEditAchievement} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addAchievement} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addAchievement} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingAchId ? "Update Achievement" : "Add Achievement"}
             </button>
           </div>
@@ -1786,7 +1786,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[9px] font-bold uppercase mb-2">
                       {ach.category}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{ach.title}</h4>
@@ -1800,7 +1800,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 </div>
                 <p className="text-xs opacity-60 mt-3 whitespace-pre-line leading-relaxed">{ach.description}</p>
                 {ach.achievementUrl && (
-                  <a href={ach.achievementUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-purple-400 hover:underline font-bold mt-3">
+                  <a href={ach.achievementUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-[#781c1c] hover:underline font-bold mt-3">
                     <ExternalLink size={10} /> View Certificate Proof
                   </a>
                 )}
@@ -1815,7 +1815,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="projects-research-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <GitBranch size={22} /> Section 6: Projects & Research
           </h3>
 
@@ -1892,7 +1892,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingProjId && (
               <button onClick={cancelEditProj} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addProjectOrResearch} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addProjectOrResearch} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingProjId ? "Update Entry" : "Add Entry"}
             </button>
           </div>
@@ -1906,7 +1906,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[9px] font-bold uppercase mb-2">
                       {proj.category || "Projects"}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{proj.title}</h4>
@@ -1920,7 +1920,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 </div>
                 <p className="text-xs opacity-60 mt-3 whitespace-pre-line leading-relaxed">{proj.description}</p>
                 {(proj.githubUrl || proj.liveUrl) && (
-                  <a href={proj.githubUrl || proj.liveUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-purple-400 hover:underline font-bold mt-3">
+                  <a href={proj.githubUrl || proj.liveUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-[#781c1c] hover:underline font-bold mt-3">
                     <ExternalLink size={10} /> View Project Link
                   </a>
                 )}
@@ -1934,7 +1934,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[9px] font-bold uppercase mb-2">
                       {paper.category || "Publications"}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{paper.title}</h4>
@@ -1948,7 +1948,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 </div>
                 <p className="text-xs opacity-60 mt-3 whitespace-pre-line leading-relaxed">{paper.abstract}</p>
                 {paper.paperUrl && (
-                  <a href={paper.paperUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-purple-400 hover:underline font-bold mt-3">
+                  <a href={paper.paperUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-[#781c1c] hover:underline font-bold mt-3">
                     <ExternalLink size={10} /> View Research Publication
                   </a>
                 )}
@@ -1963,7 +1963,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="skills-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Code size={22} /> Section 7: Skills
           </h3>
 
@@ -2008,7 +2008,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingSkillId && (
               <button onClick={cancelEditSkill} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addSkill} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addSkill} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingSkillId ? "Update Skill" : "Add Skill"}
             </button>
           </div>
@@ -2021,7 +2021,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[8px] font-bold uppercase mb-2">
                       {skill.category || "Skills"}
                     </span>
                     <h4 className="font-bold text-sm">{skill.name}</h4>
@@ -2044,7 +2044,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="licenses-certifications-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Award size={22} /> Section 8: Licenses & Certifications
           </h3>
 
@@ -2107,13 +2107,13 @@ Report Generated: ${new Date().toLocaleDateString()}
                 {!certificateUrl ? (
                   <label
                     htmlFor="certificate-file-upload"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
+                    className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
                   >
                     {uploadingField === "Certificate" ? "Uploading..." : "Upload Certificate"}
                   </label>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-xl border border-purple-500/20">
+                    <span className="flex items-center gap-1.5 text-xs text-[#781c1c] font-bold bg-[#781c1c]/10 px-3 py-1.5 rounded-xl border border-[#781c1c]/20">
                       <FileText size={14} /> Certificate Loaded
                     </span>
                     <button onClick={() => setCertificateUrl("")} className="text-xs text-red-400 font-semibold underline">Remove</button>
@@ -2127,7 +2127,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingCertId && (
               <button onClick={cancelEditCertification} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addCertification} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addCertification} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingCertId ? "Update Certificate" : "Add Certificate"}
             </button>
           </div>
@@ -2140,7 +2140,7 @@ Report Generated: ${new Date().toLocaleDateString()}
               }`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-[#781c1c]/10 text-[#781c1c] border border-[#781c1c]/20 text-[9px] font-bold uppercase mb-2">
                       {cert.category || "Certifications"}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{cert.title}</h4>
@@ -2154,7 +2154,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                   </div>
                 </div>
                 {cert.certificateUrl && (
-                  <a href={cert.certificateUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-purple-400 hover:underline font-bold mt-3">
+                  <a href={cert.certificateUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] text-[#781c1c] hover:underline font-bold mt-3">
                     <ExternalLink size={10} /> View Certificate Document
                   </a>
                 )}
@@ -2169,7 +2169,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="languages-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Globe size={22} /> Section 9: Languages known
           </h3>
 
@@ -2189,7 +2189,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition"
             >
               Save Languages
             </button>
@@ -2202,7 +2202,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="test-scores-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Award size={22} /> Section 10: Test Scores
           </h3>
 
@@ -2221,7 +2221,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition"
             >
               Save Test Scores
             </button>
@@ -2234,7 +2234,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="patents-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <FileText size={22} /> Section 11: Patents
           </h3>
 
@@ -2253,7 +2253,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition"
             >
               Save Patents
             </button>
@@ -2266,7 +2266,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="media-handles-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <Link size={22} /> Section 12: Other Media handles
           </h3>
 
@@ -2314,7 +2314,7 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition"
+              className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition"
             >
               Save Media Handles
             </button>
@@ -2327,7 +2327,7 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="resume-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-purple-400">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#781c1c]">
             <FileText size={22} /> Section 13: Resume
           </h3>
 
@@ -2357,13 +2357,13 @@ Report Generated: ${new Date().toLocaleDateString()}
                 {!resumeUrl ? (
                   <label
                     htmlFor="resume-file-upload-input"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
+                    className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-5 py-2 rounded-lg cursor-pointer text-xs font-bold transition"
                   >
                     {uploadingField === "Resume File" ? "Uploading..." : "Upload PDF"}
                   </label>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-xl border border-purple-500/20">
+                    <span className="flex items-center gap-1.5 text-xs text-[#781c1c] font-bold bg-[#781c1c]/10 px-3 py-1.5 rounded-xl border border-[#781c1c]/20">
                       <FileText size={14} /> Resume PDF Attached
                     </span>
                     <button onClick={() => setResumeUrl("")} className="text-xs text-red-400 font-semibold underline">Remove</button>
@@ -2377,7 +2377,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             {editingResumeId && (
               <button onClick={cancelEditResume} className="px-6 py-2.5 border border-red-500/20 text-red-400 rounded-xl font-bold transition text-xs">Cancel</button>
             )}
-            <button onClick={addResume} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
+            <button onClick={addResume} className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition text-xs">
               {editingResumeId ? "Update Resume" : "Save Resume"}
             </button>
           </div>
@@ -2389,10 +2389,10 @@ Report Generated: ${new Date().toLocaleDateString()}
                 themeMode === "dark" ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
               }`}>
                 <div className="flex items-center gap-3">
-                  <FileText className="text-purple-400 animate-pulse" size={20} />
+                  <FileText className="text-[#781c1c] animate-pulse" size={20} />
                   <div>
                     <h5 className="font-bold text-sm">{res.resumeTitle}</h5>
-                    <a href={res.resumeUrl} target="_blank" className="text-[10px] text-purple-400 hover:underline flex items-center gap-0.5 mt-0.5">
+                    <a href={res.resumeUrl} target="_blank" className="text-[10px] text-[#781c1c] hover:underline flex items-center gap-0.5 mt-0.5">
                       <ExternalLink size={10} /> View / Download Document
                     </a>
                   </div>
@@ -2413,8 +2413,8 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div id="ai-advisor-section" className={`border rounded-3xl p-8 transition duration-300 ${
           themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-            <Sparkles size={22} className="text-purple-400" /> AI Career Advisor
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[#781c1c] to-[#18233c]">
+            <Sparkles size={22} className="text-[#781c1c]" /> AI Career Advisor
           </h3>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -2449,7 +2449,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 <button
                   onClick={handleGenerateSop}
                   disabled={generatingSop || !targetCareer}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-bold text-xs transition"
+                  className="w-full bg-[#781c1c] hover:bg-[#5f1515] text-white py-3 rounded-xl font-bold text-xs transition"
                 >
                   {generatingSop ? "Generating Statement of Purpose..." : "Generate SOP via Gemini AI"}
                 </button>
@@ -2460,14 +2460,14 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <textarea
                       readOnly
                       value={generatedSop}
-                      className="w-full border rounded-xl p-3 text-xs bg-black/40 border-white/10 text-gray-300 min-h-[150px] font-mono mt-2"
+                      className="w-full border rounded-xl p-3 text-xs bg-[#0d0d12]/40 border-white/10 text-gray-300 min-h-[150px] font-mono mt-2"
                     />
                     <button
                       onClick={() => {
                         setSop(generatedSop);
                         alert("SOP copied to your profile! Save to commit changes.");
                       }}
-                      className="mt-2 text-xs text-purple-400 hover:underline font-bold"
+                      className="mt-2 text-xs text-[#781c1c] hover:underline font-bold"
                     >
                       Use this SOP in my profile
                     </button>
@@ -2487,7 +2487,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs opacity-60">Profile Completeness:</span>
-                    <span className="text-sm font-bold text-purple-400">{aiAnalysis.profileCompleteness}%</span>
+                    <span className="text-sm font-bold text-[#781c1c]">{aiAnalysis.profileCompleteness}%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs opacity-60">Skill Match:</span>
