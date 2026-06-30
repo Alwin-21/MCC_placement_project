@@ -19,6 +19,8 @@ namespace MCCPortfolioAPI.Entities
 
         public string Department { get; set; } = string.Empty;
 
+        public string Stream { get; set; } = string.Empty;
+
         public string RegisterNumber { get; set; } = string.Empty;
 
         public string ProfileImageUrl { get; set; } = string.Empty;

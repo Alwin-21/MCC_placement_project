@@ -42,7 +42,8 @@ namespace MCCPortfolioAPI.Tests
                 FullName = "John Doe",
                 Email = "john.doe@example.com",
                 Password = "Password123!",
-                Department = "Computer Science",
+                Stream = "Aided",
+                Department = "Mathematics",
                 RegisterNumber = "CS101"
             };
 
@@ -70,7 +71,9 @@ namespace MCCPortfolioAPI.Tests
             {
                 FullName = "Existing User",
                 Email = "existing@example.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!")
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
+                Stream = "Aided",
+                Department = "Mathematics"
             });
             await context.SaveChangesAsync();
 
@@ -78,7 +81,10 @@ namespace MCCPortfolioAPI.Tests
             {
                 FullName = "Another User",
                 Email = "existing@example.com",
-                Password = "Password123!"
+                Password = "Password123!",
+                Stream = "Aided",
+                Department = "Mathematics",
+                RegisterNumber = "MATH101"
             };
 
             // Act

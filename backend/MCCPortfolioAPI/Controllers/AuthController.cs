@@ -18,6 +18,22 @@ namespace MCCPortfolioAPI.Controllers
 
         private readonly JwtService _jwtService;
 
+        private static readonly HashSet<string> AidedDepartments = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "English", "Tamil", "Languages", "History", "Political Science", "Public Administration",
+            "Economics", "Philosophy", "Commerce", "Social Work", "Mathematics", "Statistics",
+            "Physics", "Chemistry", "Botany", "Zoology"
+        };
+
+        private static readonly HashSet<string> SfsDepartments = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "English", "Tamil", "Languages", "Journalism", "Social Work", "Commerce",
+            "Business Administration", "Communication", "Geography", "Tourism Studies",
+            "Mathematics", "Physics", "Chemistry", "Microbiology", "Computer Application (BCA)",
+            "Computer Science (B.Sc)", "Computer Science (MCA)", "Visual Communication",
+            "Physical Education, Health Education and Sports", "Psychology", "Data Science", "Physical Education"
+        };
+
         public AuthController(
             ApplicationDbContext context,
             JwtService jwtService
@@ -35,6 +51,43 @@ namespace MCCPortfolioAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Stream) && !string.IsNullOrWhiteSpace(dto.Department))
+            {
+                if (AidedDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "Aided";
+                }
+                else if (SfsDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "SFS";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Stream))
+            {
+                return BadRequest("Stream is required.");
+            }
+
+            if (dto.Stream != "Aided" && dto.Stream != "SFS")
+            {
+                return BadRequest("Stream must be either 'Aided' or 'SFS'.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Department))
+            {
+                return BadRequest("Department is required.");
+            }
+
+            if (dto.Stream == "Aided" && !AidedDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for Aided stream.");
+            }
+
+            if (dto.Stream == "SFS" && !SfsDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for SFS stream.");
+            }
+
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(x => x.Email == dto.Email);
 
@@ -49,6 +102,7 @@ namespace MCCPortfolioAPI.Controllers
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Department = dto.Department,
+                Stream = dto.Stream,
                 RegisterNumber = dto.RegisterNumber,
                 Role = UserRole.Student
             };
@@ -175,7 +229,8 @@ namespace MCCPortfolioAPI.Controllers
                     FullName = string.IsNullOrWhiteSpace(dto.FullName) ? "External User" : dto.FullName,
                     Email = dto.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
-                    Department = "Computer Science",
+                    Department = "Computer Science (B.Sc)",
+                    Stream = "SFS",
                     RegisterNumber = "EXT-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                     Role = UserRole.Student
                 };

@@ -77,9 +77,21 @@ namespace MCCPortfolioAPI.Controllers
             });
         }
 
-        // ==========================================
-        // STUDENT & USER DIRECTORY (CRUD + APPROVAL)
-        // ==========================================
+        private static readonly HashSet<string> AidedDepartments = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "English", "Tamil", "Languages", "History", "Political Science", "Public Administration",
+            "Economics", "Philosophy", "Commerce", "Social Work", "Mathematics", "Statistics",
+            "Physics", "Chemistry", "Botany", "Zoology"
+        };
+
+        private static readonly HashSet<string> SfsDepartments = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "English", "Tamil", "Languages", "Journalism", "Social Work", "Commerce",
+            "Business Administration", "Communication", "Geography", "Tourism Studies",
+            "Mathematics", "Physics", "Chemistry", "Microbiology", "Computer Application (BCA)",
+            "Computer Science (B.Sc)", "Computer Science (MCA)", "Visual Communication",
+            "Physical Education, Health Education and Sports", "Psychology", "Data Science", "Physical Education"
+        };
 
         [HttpGet("students")]
         public async Task<IActionResult> GetStudents()
@@ -99,6 +111,7 @@ namespace MCCPortfolioAPI.Controllers
                         temp.user.FullName,
                         temp.user.Email,
                         temp.user.Department,
+                        temp.user.Stream,
                         temp.user.RegisterNumber,
                         Role = temp.user.Role.ToString(),
                         IsApproved = profile != null ? profile.IsApproved : false,
@@ -119,6 +132,43 @@ namespace MCCPortfolioAPI.Controllers
         [HttpPost("students")]
         public async Task<IActionResult> CreateStudent([FromBody] RegisterDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Stream) && !string.IsNullOrWhiteSpace(dto.Department))
+            {
+                if (AidedDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "Aided";
+                }
+                else if (SfsDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "SFS";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Stream))
+            {
+                return BadRequest("Stream is required.");
+            }
+
+            if (dto.Stream != "Aided" && dto.Stream != "SFS")
+            {
+                return BadRequest("Stream must be either 'Aided' or 'SFS'.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Department))
+            {
+                return BadRequest("Department is required.");
+            }
+
+            if (dto.Stream == "Aided" && !AidedDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for Aided stream.");
+            }
+
+            if (dto.Stream == "SFS" && !SfsDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for SFS stream.");
+            }
+
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             {
                 return BadRequest("Email already exists.");
@@ -130,6 +180,7 @@ namespace MCCPortfolioAPI.Controllers
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Department = dto.Department,
+                Stream = dto.Stream,
                 RegisterNumber = dto.RegisterNumber,
                 Role = UserRole.Student
             };
@@ -156,6 +207,43 @@ namespace MCCPortfolioAPI.Controllers
                 return NotFound("Student not found.");
             }
 
+            if (string.IsNullOrWhiteSpace(dto.Stream) && !string.IsNullOrWhiteSpace(dto.Department))
+            {
+                if (AidedDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "Aided";
+                }
+                else if (SfsDepartments.Contains(dto.Department))
+                {
+                    dto.Stream = "SFS";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Stream))
+            {
+                return BadRequest("Stream is required.");
+            }
+
+            if (dto.Stream != "Aided" && dto.Stream != "SFS")
+            {
+                return BadRequest("Stream must be either 'Aided' or 'SFS'.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Department))
+            {
+                return BadRequest("Department is required.");
+            }
+
+            if (dto.Stream == "Aided" && !AidedDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for Aided stream.");
+            }
+
+            if (dto.Stream == "SFS" && !SfsDepartments.Contains(dto.Department))
+            {
+                return BadRequest($"Department '{dto.Department}' is not valid for SFS stream.");
+            }
+
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email && u.Id != id))
             {
                 return BadRequest("Email is already in use by another user.");
@@ -164,6 +252,7 @@ namespace MCCPortfolioAPI.Controllers
             user.FullName = dto.FullName;
             user.Email = dto.Email;
             user.Department = dto.Department;
+            user.Stream = dto.Stream;
             user.RegisterNumber = dto.RegisterNumber;
             
             if (Enum.TryParse<UserRole>(dto.Role, out var newRole))
@@ -839,6 +928,7 @@ namespace MCCPortfolioAPI.Controllers
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Department { get; set; } = string.Empty;
+        public string Stream { get; set; } = string.Empty;
         public string RegisterNumber { get; set; } = string.Empty;
         public string Role { get; set; } = "Student";
     }

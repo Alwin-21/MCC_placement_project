@@ -11,6 +11,8 @@ namespace MCCPortfolioAPI.DTOs
 
         public string Department { get; set; }
 
+        public string Stream { get; set; }
+
         public string RegisterNumber { get; set; }
     }
 }

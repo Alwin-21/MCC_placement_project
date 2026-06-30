@@ -11,18 +11,27 @@ export default function RegisterPage() {
 
   const router = useRouter();
 
+  const aidedDepartments = [
+    "English", "Tamil", "Languages", "History", "Political Science", "Public Administration",
+    "Economics", "Philosophy", "Commerce", "Social Work", "Mathematics", "Statistics",
+    "Physics", "Chemistry", "Botany", "Zoology"
+  ];
+
+  const sfsDepartments = [
+    "English", "Tamil", "Languages", "Journalism", "Social Work", "Commerce",
+    "Business Administration", "Communication", "Geography", "Tourism Studies",
+    "Mathematics", "Physics", "Chemistry", "Microbiology", "Computer Application (BCA)",
+    "Computer Science (B.Sc)", "Computer Science (MCA)", "Visual Communication",
+    "Physical Education, Health Education and Sports", "Psychology", "Data Science", "Physical Education"
+  ];
+
   const [fullName, setFullName] = useState("");
-
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
-
+  const [stream, setStream] = useState("");
   const [department, setDepartment] = useState("");
-
   const [registerNumber, setRegisterNumber] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
 
   const [showSocialModal, setShowSocialModal] = useState(false);
@@ -30,38 +39,56 @@ export default function RegisterPage() {
   const [socialEmail, setSocialEmail] = useState("");
   const [socialName, setSocialName] = useState("");
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleStreamChange = (val: string) => {
+    setStream(val);
+    setDepartment("");
+  };
 
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!fullName || !email || !password || !registerNumber) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (!stream) {
+      setError("Stream is required.");
+      return;
+    }
+
+    if (!department) {
+      setError("Department is required.");
+      return;
+    }
+
+    // Double check that department belongs to stream
+    const validDepts = stream === "Aided" ? aidedDepartments : sfsDepartments;
+    if (!validDepts.includes(department)) {
+      setError("The selected department does not match the chosen stream.");
+      return;
+    }
+
     try {
-
       setLoading(true);
-
       setError("");
 
       const response = await api.post("/Auth/register", {
         fullName,
         email,
         password,
+        stream,
         department,
         registerNumber,
       });
 
       localStorage.setItem("token", response.data.token);
-
       localStorage.setItem("user", JSON.stringify(response.data));
-
       router.push("/dashboard");
-
     } catch (err: any) {
-
-      setError("Registration failed");
-
+      setError(err.response?.data || "Registration failed");
     } finally {
-
       setLoading(false);
-
     }
   };
 
@@ -155,13 +182,30 @@ export default function RegisterPage() {
               className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
             />
 
-            <input
-              type="text"
-              placeholder="Department"
+            <select
+              value={stream}
+              onChange={(e) => handleStreamChange(e.target.value)}
+              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-purple-400 cursor-pointer"
+            >
+              <option value="" className="bg-[#050507] text-gray-400">Select Stream *</option>
+              <option value="Aided" className="bg-[#050507] text-white">Aided</option>
+              <option value="SFS" className="bg-[#050507] text-white">SFS</option>
+            </select>
+
+            <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
-            />
+              disabled={!stream}
+              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-purple-400 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer md:col-span-2"
+            >
+              <option value="" className="bg-[#050507] text-gray-400">Select Department *</option>
+              {stream === "Aided" && aidedDepartments.map((dept, idx) => (
+                <option key={idx} value={dept} className="bg-[#050507] text-white">{dept}</option>
+              ))}
+              {stream === "SFS" && sfsDepartments.map((dept, idx) => (
+                <option key={idx} value={dept} className="bg-[#050507] text-white">{dept}</option>
+              ))}
+            </select>
 
           </div>
 
