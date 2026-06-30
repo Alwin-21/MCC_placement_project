@@ -12,6 +12,10 @@ namespace MCCPortfolioAPI.DTOs
 
         public string Stream { get; set; } = string.Empty;
 
+        public string Username { get; set; } = string.Empty;
+
+        public bool IsTemporaryPassword { get; set; }
+
         public string RegisterNumber { get; set; } = string.Empty;
 
         public string ProfileImageUrl { get; set; } = string.Empty;

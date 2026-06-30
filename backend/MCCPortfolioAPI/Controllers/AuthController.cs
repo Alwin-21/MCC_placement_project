@@ -7,6 +7,9 @@ using MCCPortfolioAPI.Models;
 using MCCPortfolioAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MCCPortfolioAPI.Controllers
 {
@@ -34,14 +37,25 @@ namespace MCCPortfolioAPI.Controllers
             "Physical Education, Health Education and Sports", "Psychology", "Data Science", "Physical Education"
         };
 
+        private readonly IEmailService _emailService;
+
         public AuthController(
             ApplicationDbContext context,
-            JwtService jwtService
+            JwtService jwtService,
+            IEmailService emailService
         )
         {
             _context = context;
-
             _jwtService = jwtService;
+            _emailService = emailService;
+        }
+
+        private string GenerateTemporaryPassword()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 10)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         // =========================
@@ -96,11 +110,24 @@ namespace MCCPortfolioAPI.Controllers
                 return BadRequest("Email already exists");
             }
 
+            // Generate unique username
+            string username;
+            do
+            {
+                var cleanName = dto.FullName.Replace(" ", "").ToLower();
+                username = $"mcc_{cleanName}_{new Random().Next(100, 999)}";
+            } while (await _context.Users.AnyAsync(u => u.Username == username));
+
+            // Generate secure random temporary password
+            var temporaryPassword = GenerateTemporaryPassword();
+
             var user = new User
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                Username = username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
+                IsTemporaryPassword = true,
                 Department = dto.Department,
                 Stream = dto.Stream,
                 RegisterNumber = dto.RegisterNumber,
@@ -108,19 +135,25 @@ namespace MCCPortfolioAPI.Controllers
             };
 
             _context.Users.Add(user);
-
             await _context.SaveChangesAsync();
 
-            var token = _jwtService.GenerateToken(user);
+            // Send Email Credentials
+            var subject = "Your Madras Christian College Portfolio Credentials";
+            var body = $"Dear {user.FullName},\n\n" +
+                       $"Your student portfolio account has been created successfully!\n\n" +
+                       $"Please use the following credentials to access the placement platform:\n" +
+                       $"  Username: {username}\n" +
+                       $"  Temporary Password: {temporaryPassword}\n\n" +
+                       $"Instructions:\n" +
+                       $"1. Visit the portal login page.\n" +
+                       $"2. Enter your generated username and temporary password.\n" +
+                       $"3. Upon first login, you will be prompted to change your temporary password to a secure permanent one.\n\n" +
+                       $"Best regards,\n" +
+                       $"Placement Cell, Madras Christian College";
 
-            return Ok(new AuthResponseDto
-            {
-                Id = user.Id,
-                Token = token,
-                FullName = user.FullName,
-                Email = user.Email,
-                Role = user.Role.ToString()
-            });
+            await _emailService.SendEmailAsync(user.Email, subject, body);
+
+            return Ok(new { success = true, message = "Registration successful. Login credentials have been sent to your registered email." });
         }
 
         // =========================
@@ -130,8 +163,9 @@ namespace MCCPortfolioAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
+            var searchKey = !string.IsNullOrWhiteSpace(dto.Username) ? dto.Username : dto.Email;
             var user = await _context.Users
-                .FirstOrDefaultAsync(x => x.Email == dto.Email);
+                .FirstOrDefaultAsync(x => x.Username == searchKey || x.Email == searchKey);
 
             if (user == null)
             {
@@ -156,7 +190,8 @@ namespace MCCPortfolioAPI.Controllers
                 Token = token,
                 FullName = user.FullName,
                 Email = user.Email,
-                Role = user.Role.ToString()
+                Role = user.Role.ToString(),
+                IsTemporaryPassword = user.IsTemporaryPassword
             });
         }
 
@@ -247,8 +282,38 @@ namespace MCCPortfolioAPI.Controllers
                 Token = token,
                 FullName = user.FullName,
                 Email = user.Email,
-                Role = user.Role.ToString()
+                Role = user.Role.ToString(),
+                IsTemporaryPassword = user.IsTemporaryPassword
             });
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Length < 6)
+            {
+                return BadRequest("Password must be at least 6 characters.");
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user.IsTemporaryPassword = false;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Password updated successfully." });
         }
     }
 }

@@ -46,6 +46,8 @@ namespace MCCPortfolioAPI.Controllers
                 Email = user.Email,
                 Department = user.Department,
                 Stream = user.Stream,
+                Username = user.Username,
+                IsTemporaryPassword = user.IsTemporaryPassword,
                 RegisterNumber = user.RegisterNumber,
                 ProfileImageUrl = user.ProfileImageUrl,
                 Role = user.Role.ToString()

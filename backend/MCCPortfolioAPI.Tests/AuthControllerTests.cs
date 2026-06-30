@@ -5,6 +5,7 @@ using MCCPortfolioAPI.Models;
 using MCCPortfolioAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -15,6 +16,7 @@ namespace MCCPortfolioAPI.Tests
     {
         private readonly IConfiguration _configuration;
         private readonly JwtService _jwtService;
+        private readonly IEmailService _emailService;
 
         public AuthControllerTests()
         {
@@ -28,6 +30,7 @@ namespace MCCPortfolioAPI.Tests
                 .Build();
 
             _jwtService = new JwtService(_configuration);
+            _emailService = new MockEmailService();
         }
 
         [Fact]
@@ -35,7 +38,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             var registerDto = new RegisterDto
             {
@@ -52,12 +55,13 @@ namespace MCCPortfolioAPI.Tests
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<AuthResponseDto>(okResult.Value);
+            Assert.NotNull(okResult.Value);
 
-            Assert.Equal("John Doe", response.FullName);
-            Assert.Equal("john.doe@example.com", response.Email);
-            Assert.Equal("Student", response.Role);
-            Assert.False(string.IsNullOrEmpty(response.Token));
+            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "john.doe@example.com");
+            Assert.NotNull(dbUser);
+            Assert.Equal("John Doe", dbUser.FullName);
+            Assert.False(string.IsNullOrEmpty(dbUser.Username));
+            Assert.True(dbUser.IsTemporaryPassword);
         }
 
         [Fact]
@@ -65,7 +69,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             context.Users.Add(new User
             {
@@ -100,7 +104,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             context.Users.Add(new User
             {
@@ -133,7 +137,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             context.Users.Add(new User
             {
@@ -175,7 +179,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             var loginDto = new LoginDto
             {
@@ -205,7 +209,7 @@ namespace MCCPortfolioAPI.Tests
         {
             // Arrange
             using var context = TestDatabaseFixture.CreateDbContext();
-            var controller = new AuthController(context, _jwtService);
+            var controller = new AuthController(context, _jwtService, _emailService);
 
             var loginDto = new LoginDto
             {
@@ -218,6 +222,14 @@ namespace MCCPortfolioAPI.Tests
 
             // Assert
             Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+    }
+
+    public class MockEmailService : IEmailService
+    {
+        public Task SendEmailAsync(string toEmail, string subject, string body)
+        {
+            return Task.CompletedTask;
         }
     }
 }

@@ -3,40 +3,109 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, Lock, ShieldAlert } from "lucide-react";
+import { ArrowLeft, User, Lock, ShieldAlert, KeyRound, CheckCircle2 } from "lucide-react";
 import api from "@/services/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  
+  // Login States
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Social Mock Login Modal
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [socialProvider, setSocialProvider] = useState("");
   const [socialEmail, setSocialEmail] = useState("");
   const [socialName, setSocialName] = useState("");
 
+  // Change Password States (For First Login Requirement)
+  const [tempToken, setTempToken] = useState("");
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changeError, setChangeError] = useState("");
+  const [changeSuccess, setChangeSuccess] = useState("");
+  const [tempResponseData, setTempResponseData] = useState<any>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please enter both email and password.");
+    if (!username || !password) {
+      setError("Please enter both username and password.");
       return;
     }
     try {
       setLoading(true);
       setError("");
+      
       const response = await api.post("/Auth/login", {
-        email,
+        username,
         password,
       });
 
+      // If it is a temporary password, show the change password panel instead of redirecting
+      if (response.data.isTemporaryPassword) {
+        setTempToken(response.data.token);
+        setTempResponseData(response.data);
+        setShowChangePasswordModal(true);
+        setLoading(false);
+        return;
+      }
+
+      // Normal Login Success Flow
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data));
       router.push("/dashboard");
     } catch (err: any) {
-      setError("Invalid email or password");
+      setError(err.response?.data || "Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setChangeError("");
+    setChangeSuccess("");
+
+    if (!newPassword || newPassword.length < 6) {
+      setChangeError("New password must be at least 6 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setChangeError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Post to the change-password API using the temporary token
+      await api.post("/Auth/change-password", {
+        newPassword,
+      }, {
+        headers: {
+          Authorization: `Bearer ${tempToken}`
+        }
+      });
+
+      setChangeSuccess("Password changed successfully! Redirecting you to the dashboard...");
+      
+      // Store credentials and login fully
+      setTimeout(() => {
+        localStorage.setItem("token", tempToken);
+        localStorage.setItem("user", JSON.stringify({
+          ...tempResponseData,
+          isTemporaryPassword: false
+        }));
+        router.push("/dashboard");
+      }, 1500);
+
+    } catch (err: any) {
+      setChangeError(err.response?.data || "Failed to update password.");
     } finally {
       setLoading(false);
     }
@@ -113,7 +182,7 @@ export default function LoginPage() {
           <h2 className="font-serif text-3xl md:text-4xl font-extrabold text-white leading-tight mb-4">
             Showcase your academic & professional milestone.
           </h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-slate-350 leading-relaxed">
             Create verified portfolios, publish publications, coordinate live demo links, and get AI-powered career feedback customized for MCC students.
           </p>
         </div>
@@ -138,31 +207,31 @@ export default function LoginPage() {
                 Student Log In
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                Enter your registered details to access your dashboard
+                Enter your generated unique credentials received in your email
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
               
               <div>
-                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
-                  Email Address
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
+                  Username
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                  <User className="absolute left-4 top-3.5 text-slate-400" size={16} />
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your generated username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
                   Password
                 </label>
                 <div className="relative">
@@ -170,7 +239,7 @@ export default function LoginPage() {
                   <input
                     type="password"
                     required
-                    placeholder="Enter your password"
+                    placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
@@ -207,21 +276,21 @@ export default function LoginPage() {
               <button
                 onClick={() => handleExternalSignIn("Google")}
                 type="button"
-                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-355 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
               >
                 Google
               </button>
               <button
                 onClick={() => handleExternalSignIn("GitHub")}
                 type="button"
-                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-355 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
               >
                 GitHub
               </button>
             </div>
 
             <p className="text-center text-slate-400 mt-6 text-[10px] uppercase font-mono font-semibold tracking-wider">
-              Build your professional student identity
+              Verify credentials via email delivery
             </p>
 
           </div>
@@ -232,6 +301,81 @@ export default function LoginPage() {
 
         </div>
       </div>
+
+      {/* MODAL: CHANGE TEMPORARY PASSWORD (First Login Process) */}
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 z-50 bg-[#18233c]/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-left space-y-6">
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <KeyRound size={24} />
+              </div>
+              <h3 className="text-xl font-serif font-extrabold text-[#18233c]">
+                Change Temporary Password
+              </h3>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                As a secure credential validation measure, you must update your system-generated temporary password before accessing the dashboard.
+              </p>
+            </div>
+
+            <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+              
+              <div>
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
+                  New Secure Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Min 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-805 text-xs px-4 py-3 rounded-xl outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-enter new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-805 text-xs px-4 py-3 rounded-xl outline-none transition"
+                />
+              </div>
+
+              {changeError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                  <ShieldAlert size={14} className="shrink-0" />
+                  <span>{changeError}</span>
+                </div>
+              )}
+
+              {changeSuccess && (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                  <CheckCircle2 size={14} className="shrink-0" />
+                  <span>{changeSuccess}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white font-bold text-xs uppercase tracking-wider transition duration-205 cursor-pointer shadow hover:shadow-md"
+              >
+                {loading ? "Updating..." : "Update Password & Proceed"}
+              </button>
+
+            </form>
+
+          </div>
+        </div>
+      )}
 
       {/* Simulated Social OAuth Dialog */}
       {showSocialModal && (
@@ -246,7 +390,7 @@ export default function LoginPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase font-mono font-bold text-slate-650 block mb-1">Full Name</label>
+                <label className="text-[10px] uppercase font-mono font-bold text-slate-655 block mb-1">Full Name</label>
                 <input
                   type="text"
                   value={socialName}
@@ -256,7 +400,7 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="text-[10px] uppercase font-mono font-bold text-slate-650 block mb-1">Social Email Address</label>
+                <label className="text-[10px] uppercase font-mono font-bold text-slate-655 block mb-1">Social Email Address</label>
                 <input
                   type="email"
                   value={socialEmail}
@@ -268,7 +412,7 @@ export default function LoginPage() {
               <div className="pt-2 flex gap-3">
                 <button
                   onClick={() => setShowSocialModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-650 transition"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-655 transition"
                 >
                   Cancel
                 </button>

@@ -21,6 +21,10 @@ namespace MCCPortfolioAPI.Entities
 
         public string Stream { get; set; } = string.Empty;
 
+        public string Username { get; set; } = string.Empty;
+
+        public bool IsTemporaryPassword { get; set; } = true;
+
         public string RegisterNumber { get; set; } = string.Empty;
 
         public string ProfileImageUrl { get; set; } = string.Empty;
