@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User, Mail, Lock, Key, ShieldAlert } from "lucide-react";
 import api from "@/services/api";
 
 export default function RegisterPage() {
-
   const router = useRouter();
 
   const aidedDepartments = [
@@ -131,190 +129,284 @@ export default function RegisterPage() {
   };
 
   return (
-
-    <div className="min-h-screen bg-[#050507] text-[#f3f4f6] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen flex bg-[#fcfaf6] text-[#2c2c2c] font-sans">
       
-      {/* Background Glow */}
-      <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl top-[-100px] left-[-100px] pointer-events-none" />
+      {/* LEFT PANEL: CAMPUS ARCHWAY SHOWCASE (Hidden on Mobile) */}
+      <div className="hidden lg:flex lg:w-5/12 relative bg-[#18233c] text-white p-12 flex-col justify-between overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/mcc-entrance-gate.jpg" 
+            alt="MCC Entrance Gate" 
+            className="w-full h-full object-cover opacity-35 filter brightness-75 contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#18233c] via-[#18233c]/60 to-transparent" />
+        </div>
 
-      <div className="w-full max-w-2xl">
-        
-        {/* Back Link */}
-        <Link href="/" className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-white mb-6 transition duration-200">
-          <ArrowLeft size={14} /> Back to Home
-        </Link>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#781c1c] flex items-center justify-center shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f7f5f0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="12" cy="5" r="3" />
+              <line x1="12" y1="8" x2="12" y2="22" />
+              <line x1="6" y1="12" x2="18" y2="12" />
+              <path d="M5 12a7 7 0 0 0 14 0" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-serif font-black text-sm tracking-wider block uppercase">Madras Christian College</span>
+            <span className="text-[8px] uppercase tracking-widest text-amber-400 block font-bold">Autonomous placement directory</span>
+          </div>
+        </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-xl">
+        <div className="relative z-10 max-w-sm mb-8">
+          <h2 className="font-serif text-3xl font-extrabold text-white leading-tight mb-4">
+            Join the Verified Registry
+          </h2>
+          <p className="text-xs text-slate-350 leading-relaxed">
+            Create an official student resume profile. Showcase academic records, projects, research papers, languages, patents, test scores, and handles directly to verifying administrators.
+          </p>
+        </div>
 
-        <h1 className="text-5xl font-bold mb-3 text-center">
-          Create Account
-        </h1>
+        <div className="relative z-10 text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+          Established 1837 · Chennai, India
+        </div>
+      </div>
 
-        <p className="text-gray-400 text-center mb-10">
-          Join MCC Portfolio Platform
-        </p>
+      {/* RIGHT PANEL: REGISTER FORM SECTION */}
+      <div className="w-full lg:w-7/12 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+        <div className="w-full max-w-xl space-y-6">
+          
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#781c1c] transition duration-200">
+            <ArrowLeft size={14} /> Back to Home
+          </Link>
 
-        <form onSubmit={handleRegister} className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-lg">
+            
+            <div className="text-center mb-8">
+              <h1 className="font-serif text-3xl font-extrabold text-[#18233c] mb-1">
+                Student Registration
+              </h1>
+              <p className="text-xs text-slate-500 font-medium">
+                Create your verified placement profile on the platform
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
+            <form onSubmit={handleRegister} className="space-y-4">
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
+                    />
+                  </div>
+                </div>
 
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
-            />
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter college email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
+                    />
+                  </div>
+                </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
-            />
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                    <input
+                      type="password"
+                      required
+                      placeholder="Min 6 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
+                    />
+                  </div>
+                </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
-            />
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Register Number
+                  </label>
+                  <div className="relative">
+                    <Key className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 2111711019011"
+                      value={registerNumber}
+                      onChange={(e) => setRegisterNumber(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
+                    />
+                  </div>
+                </div>
 
-            <select
-              value={stream}
-              onChange={(e) => handleStreamChange(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-purple-400 cursor-pointer"
-            >
-              <option value="" className="bg-[#050507] text-gray-400">Select Stream *</option>
-              <option value="Aided" className="bg-[#050507] text-white">Aided</option>
-              <option value="SFS" className="bg-[#050507] text-white">SFS</option>
-            </select>
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Stream *
+                  </label>
+                  <select
+                    required
+                    value={stream}
+                    onChange={(e) => handleStreamChange(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 text-xs px-4 py-3.5 rounded-xl outline-none transition cursor-pointer"
+                  >
+                    <option value="">Select Stream</option>
+                    <option value="Aided">Aided</option>
+                    <option value="SFS">SFS</option>
+                  </select>
+                </div>
 
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              disabled={!stream}
-              className="bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-purple-400 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer md:col-span-2"
-            >
-              <option value="" className="bg-[#050507] text-gray-400">Select Department *</option>
-              {stream === "Aided" && aidedDepartments.map((dept, idx) => (
-                <option key={idx} value={dept} className="bg-[#050507] text-white">{dept}</option>
-              ))}
-              {stream === "SFS" && sfsDepartments.map((dept, idx) => (
-                <option key={idx} value={dept} className="bg-[#050507] text-white">{dept}</option>
-              ))}
-            </select>
+                <div>
+                  <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+                    Department *
+                  </label>
+                  <select
+                    required
+                    disabled={!stream}
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 text-xs px-4 py-3.5 rounded-xl outline-none transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <option value="">Select Department</option>
+                    {stream === "Aided" && aidedDepartments.map((dept, idx) => (
+                      <option key={idx} value={dept}>{dept}</option>
+                    ))}
+                    {stream === "SFS" && sfsDepartments.map((dept, idx) => (
+                      <option key={idx} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl flex items-center gap-2">
+                  <ShieldAlert size={14} className="shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md cursor-pointer hover:shadow-lg active:scale-98"
+              >
+                {loading ? "Creating Account..." : "Register"}
+              </button>
+
+            </form>
+
+            {/* Social Divider */}
+            <div className="flex items-center my-6">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="px-3 text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">Or Continue With</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+
+            {/* Social Logins */}
+            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+              <button
+                onClick={() => handleExternalSignIn("Google")}
+                type="button"
+                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+              >
+                Google
+              </button>
+              <button
+                onClick={() => handleExternalSignIn("GitHub")}
+                type="button"
+                className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
+              >
+                GitHub
+              </button>
+            </div>
+
+            <p className="text-center text-slate-400 mt-6 text-[10px] uppercase font-mono font-semibold tracking-wider">
+              Join fellow student leaders
+            </p>
 
           </div>
 
-          <input
-            type="text"
-            placeholder="Register Number"
-            value={registerNumber}
-            onChange={(e) => setRegisterNumber(e.target.value)}
-            className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder-gray-400"
-          />
+          <div className="text-center text-xs text-slate-500 pb-4">
+            Already have an account? <Link href="/login" className="text-[#781c1c] font-bold hover:underline">Log in here</Link>
+          </div>
 
-          {error && (
-            <p className="text-red-400 text-sm">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition cursor-pointer"
-          >
-            {loading ? "Creating Account..." : "Register"}
-          </button>
-
-        </form>
-
-        {/* Social Divider */}
-        <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="px-3 text-xs text-gray-500 uppercase tracking-widest font-mono">Or Register With</span>
-          <div className="flex-1 h-px bg-white/10" />
         </div>
-
-        {/* Social Logins */}
-        <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-          <button
-            onClick={() => handleExternalSignIn("Google")}
-            type="button"
-            className="py-3.5 px-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
-          >
-            Google
-          </button>
-          <button
-            onClick={() => handleExternalSignIn("GitHub")}
-            type="button"
-            className="py-3.5 px-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
-          >
-            GitHub
-          </button>
-        </div>
-
       </div>
+
+      {/* Simulated Social OAuth Dialog */}
+      {showSocialModal && (
+        <div className="fixed inset-0 z-50 bg-[#18233c]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-left">
+            <h3 className="text-lg font-serif font-extrabold text-[#18233c] mb-2 flex items-center gap-2">
+              🔒 Simulated {socialProvider} Authentication
+            </h3>
+            <p className="text-slate-500 text-xs mb-6">
+              This simulated social OAuth registers you and issues a standard JWT token locally.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono font-bold text-slate-650 block mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={socialName}
+                  onChange={(e) => setSocialName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#781c1c]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-mono font-bold text-slate-650 block mb-1">Social Email Address</label>
+                <input
+                  type="email"
+                  value={socialEmail}
+                  onChange={(e) => setSocialEmail(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#781c1c]"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  onClick={() => setShowSocialModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-650 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitExternalLogin}
+                  className="flex-1 py-2.5 rounded-xl bg-[#781c1c] text-white text-xs font-bold transition hover:opacity-95"
+                >
+                  Confirm & Sign In
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
-
-    {/* Simulated Social OAuth Dialog */}
-    {showSocialModal && (
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-        <div className="relative w-full max-w-md bg-[#0a0a0f] border border-purple-500/20 rounded-3xl p-8 shadow-2xl text-left">
-          <div className="absolute top-[-40px] left-[-40px] w-48 h-48 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
-          
-          <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-            🔒 Simulated {socialProvider} Authentication
-          </h3>
-          <p className="text-gray-400 text-xs mb-6">
-            This simulated social OAuth registers you and issues a standard JWT token locally.
-          </p>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Full Name</label>
-              <input
-                type="text"
-                value={socialName}
-                onChange={(e) => setSocialName(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Social Email Address</label>
-              <input
-                type="email"
-                value={socialEmail}
-                onChange={(e) => setSocialEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-400"
-              />
-            </div>
-
-            <div className="pt-2 flex gap-3">
-              <button
-                onClick={() => setShowSocialModal(false)}
-                className="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold text-gray-300 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={submitExternalLogin}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold transition hover:scale-[1.02]"
-              >
-                Confirm & Sign In
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-  </div>
   );
 }
