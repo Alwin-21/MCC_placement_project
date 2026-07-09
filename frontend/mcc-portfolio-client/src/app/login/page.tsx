@@ -181,7 +181,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               
               <div>
                 <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
@@ -195,6 +195,7 @@ export default function LoginPage() {
                     placeholder="Enter your generated username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    autoComplete="username"
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
                   />
                 </div>
@@ -212,6 +213,7 @@ export default function LoginPage() {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
                     className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
                   />
                 </div>

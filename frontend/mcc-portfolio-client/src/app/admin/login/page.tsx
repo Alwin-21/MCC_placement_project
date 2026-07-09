@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5" autoComplete="off">
             
             <div>
               <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
@@ -77,13 +77,14 @@ export default function AdminLoginPage() {
                   placeholder="admin@mcc.edu.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-650 block mb-1.5">
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-655 block mb-1.5">
                 Secure Password
               </label>
               <div className="relative">
@@ -94,6 +95,7 @@ export default function AdminLoginPage() {
                   placeholder="Enter administrator password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   className="w-full bg-slate-50 border border-slate-200 focus:border-[#781c1c] text-slate-800 placeholder-slate-400 text-xs px-11 py-3.5 rounded-xl outline-none focus:ring-1 focus:ring-[#781c1c]/10 transition"
                 />
               </div>
