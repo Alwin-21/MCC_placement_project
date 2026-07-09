@@ -31,6 +31,8 @@ namespace MCCPortfolioAPI.Entities
 
         public UserRole Role { get; set; } = UserRole.Student;
 
+        public bool IsActive { get; set; } = true;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

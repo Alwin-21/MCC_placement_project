@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace MCCPortfolioAPI.Tests
@@ -43,7 +45,7 @@ namespace MCCPortfolioAPI.Tests
             var registerDto = new RegisterDto
             {
                 FullName = "John Doe",
-                Email = "john.doe@example.com",
+                Email = "john.doe@mcc.edu.in",
                 Password = "Password123!",
                 Stream = "Aided",
                 Department = "Mathematics",
@@ -57,7 +59,7 @@ namespace MCCPortfolioAPI.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.NotNull(okResult.Value);
 
-            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "john.doe@example.com");
+            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "john.doe@mcc.edu.in");
             Assert.NotNull(dbUser);
             Assert.Equal("John Doe", dbUser.FullName);
             Assert.False(string.IsNullOrEmpty(dbUser.Username));
@@ -74,7 +76,7 @@ namespace MCCPortfolioAPI.Tests
             context.Users.Add(new User
             {
                 FullName = "Existing User",
-                Email = "existing@example.com",
+                Email = "existing@mcc.edu.in",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
                 Stream = "Aided",
                 Department = "Mathematics"
@@ -84,7 +86,7 @@ namespace MCCPortfolioAPI.Tests
             var registerDto = new RegisterDto
             {
                 FullName = "Another User",
-                Email = "existing@example.com",
+                Email = "existing@mcc.edu.in",
                 Password = "Password123!",
                 Stream = "Aided",
                 Department = "Mathematics",
@@ -109,14 +111,14 @@ namespace MCCPortfolioAPI.Tests
             context.Users.Add(new User
             {
                 FullName = "Bob Smith",
-                Email = "bob.smith@example.com",
+                Email = "bob.smith@mcc.edu.in",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("SecretPass!")
             });
             await context.SaveChangesAsync();
 
             var loginDto = new LoginDto
             {
-                Email = "bob.smith@example.com",
+                Email = "bob.smith@mcc.edu.in",
                 Password = "SecretPass!"
             };
 
@@ -142,14 +144,14 @@ namespace MCCPortfolioAPI.Tests
             context.Users.Add(new User
             {
                 FullName = "Bob Smith",
-                Email = "bob.smith@example.com",
+                Email = "bob.smith@mcc.edu.in",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("SecretPass!")
             });
             await context.SaveChangesAsync();
 
             var loginDto = new LoginDto
             {
-                Email = "bob.smith@example.com",
+                Email = "bob.smith@mcc.edu.in",
                 Password = "WrongPassword"
             };
 
@@ -222,6 +224,131 @@ namespace MCCPortfolioAPI.Tests
 
             // Assert
             Assert.IsType<UnauthorizedObjectResult>(result);
+        }
+
+        private ControllerContext CreateMockUserContext(string userId)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Name, "Student User")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            return new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
+        }
+
+        [Fact]
+        public async Task ChangePassword_ValidRequest_UpdatesPasswordAndClearsTemporaryFlag()
+        {
+            // Arrange
+            using var context = TestDatabaseFixture.CreateDbContext();
+            var controller = new AuthController(context, _jwtService, _emailService);
+
+            var user = new User
+            {
+                FullName = "Change Pass Student",
+                Email = "changepass@mcc.edu.in",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("TempPass123!"),
+                IsTemporaryPassword = true
+            };
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+
+            controller.ControllerContext = CreateMockUserContext(user.Id.ToString());
+
+            var changePasswordDto = new ChangePasswordDto
+            {
+                NewPassword = "NewSecurePassword123!"
+            };
+
+            // Act
+            var result = await controller.ChangePassword(changePasswordDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+
+            // Re-fetch user to check DB state
+            var dbUser = await context.Users.FindAsync(user.Id);
+            Assert.NotNull(dbUser);
+            Assert.False(dbUser.IsTemporaryPassword);
+            Assert.True(BCrypt.Net.BCrypt.Verify("NewSecurePassword123!", dbUser.PasswordHash));
+        }
+
+        [Fact]
+        public async Task Register_InvalidEmailDomain_ReturnsBadRequest()
+        {
+            // Arrange
+            using var context = TestDatabaseFixture.CreateDbContext();
+            var controller = new AuthController(context, _jwtService, _emailService);
+
+            var registerDto = new RegisterDto
+            {
+                FullName = "Invalid Domain User",
+                Email = "invalid@gmail.com",
+                Password = "Password123!",
+                Stream = "Aided",
+                Department = "Mathematics",
+                RegisterNumber = "MATH102"
+            };
+
+            // Act
+            var result = await controller.Register(registerDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("restricted to Madras Christian College email addresses", badRequestResult.Value.ToString());
+        }
+
+        [Fact]
+        public async Task ExternalLogin_InvalidEmailDomain_ReturnsBadRequest()
+        {
+            // Arrange
+            using var context = TestDatabaseFixture.CreateDbContext();
+            var controller = new AuthController(context, _jwtService, _emailService);
+
+            var externalDto = new ExternalLoginDto
+            {
+                Email = "invalid@gmail.com",
+                FullName = "External Invalid",
+                Provider = "Google",
+                ExternalId = "ext_123"
+            };
+
+            // Act
+            var result = await controller.ExternalLogin(externalDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("restricted to Madras Christian College email addresses", badRequestResult.Value.ToString());
+        }
+
+        [Fact]
+        public async Task ExternalLogin_ValidEmailDomain_ReturnsOk()
+        {
+            // Arrange
+            using var context = TestDatabaseFixture.CreateDbContext();
+            var controller = new AuthController(context, _jwtService, _emailService);
+
+            var externalDto = new ExternalLoginDto
+            {
+                Email = "valid@mcc.edu.in",
+                FullName = "External Valid",
+                Provider = "Google",
+                ExternalId = "ext_123"
+            };
+
+            // Act
+            var result = await controller.ExternalLogin(externalDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<AuthResponseDto>(okResult.Value);
+            Assert.Equal("valid@mcc.edu.in", response.Email);
         }
     }
 

@@ -45,6 +45,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!email.toLowerCase().endsWith("@mcc.edu.in")) {
+      setError("Registration is restricted to Madras Christian College email addresses ending with '@mcc.edu.in'.");
+      return;
+    }
+
     if (!stream) {
       setError("Stream is required.");
       return;
@@ -107,13 +112,8 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#781c1c] flex items-center justify-center shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f7f5f0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <circle cx="12" cy="5" r="3" />
-              <line x1="12" y1="8" x2="12" y2="22" />
-              <line x1="6" y1="12" x2="18" y2="12" />
-              <path d="M5 12a7 7 0 0 0 14 0" />
-            </svg>
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden shrink-0 p-0.5 border border-white/20">
+            <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
           </div>
           <div>
             <span className="font-serif font-black text-sm tracking-wider block uppercase">Madras Christian College</span>

@@ -51,7 +51,9 @@ export default function SearchPage() {
           </Link>
           
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-white border border-[#781c1c]/10 flex items-center justify-center shadow-xs shrink-0 p-0.5">
+              <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+            </div>
             <span className="text-[10px] uppercase font-mono tracking-widest text-[#781c1c] font-black">
               MCC Student Directory
             </span>

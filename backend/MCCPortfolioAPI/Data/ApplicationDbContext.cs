@@ -20,6 +20,7 @@ namespace MCCPortfolioAPI.Data
         public DbSet<Hackathon> Hackathons { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Resume> Resumes { get; set; }
+        public DbSet<SavedResume> SavedResumes { get; set; }
         public DbSet<CommunityService> CommunityServices { get; set; }
         public DbSet<CreativeWork> CreativeWorks { get; set; }
         public DbSet<InstitutionDetail> InstitutionDetails { get; set; }

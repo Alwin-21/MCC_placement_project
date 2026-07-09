@@ -20,7 +20,13 @@ namespace MCCPortfolioAPI.Controllers
         public async Task<IActionResult> GetPortfolioByUsername(string username)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(x => x.FullName.Replace(" ", "").Replace("-", "").ToLower() == username.ToLower());
+                .FirstOrDefaultAsync(x => x.Username != null && x.Username.ToLower() == username.ToLower());
+
+            if (user == null)
+            {
+                user = await _context.Users
+                    .FirstOrDefaultAsync(x => x.FullName.Replace(" ", "").Replace("-", "").ToLower() == username.ToLower());
+            }
 
             if (user == null)
             {

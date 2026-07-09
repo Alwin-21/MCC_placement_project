@@ -51,13 +51,8 @@ export default function AdminLoginPage() {
         <div className="bg-white border border-slate-200 rounded-3xl p-10 shadow-lg">
           
           <div className="text-center mb-8">
-            <div className="w-12 h-12 rounded-full bg-[#18233c] text-white flex items-center justify-center mx-auto mb-4 shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                <circle cx="12" cy="5" r="3" />
-                <line x1="12" y1="8" x2="12" y2="22" />
-                <line x1="6" y1="12" x2="18" y2="12" />
-                <path d="M5 12a7 7 0 0 0 14 0" />
-              </svg>
+            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-4 border border-slate-200 shadow-md overflow-hidden shrink-0 p-1">
+              <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
             </div>
             
             <h1 className="font-serif text-3xl font-extrabold text-[#18233c] mb-1">

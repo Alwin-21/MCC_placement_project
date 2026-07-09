@@ -133,6 +133,7 @@ namespace MCCPortfolioAPI.Controllers
             }
 
             var profile = await _context.Profiles
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.UserId == int.Parse(userId));
 
             return Ok(profile);

@@ -11,7 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<MCCPortfolioAPI.Filters.AuditLogFilter>();
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -80,6 +83,17 @@ using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
+
+        // Ensure all existing users default to Active
+        var usersToActivate = context.Users.Where(u => !u.IsActive).ToList();
+        if (usersToActivate.Any())
+        {
+            foreach (var u in usersToActivate)
+            {
+                u.IsActive = true;
+            }
+            context.SaveChanges();
+        }
 
         // Seed default Institution Detail
         if (!context.InstitutionDetails.Any())

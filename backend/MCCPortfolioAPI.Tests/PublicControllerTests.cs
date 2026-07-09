@@ -182,6 +182,36 @@ namespace MCCPortfolioAPI.Tests
         }
 
         [Fact]
+        public async Task GetPortfolioByUsername_UserExistsByUsername_ReturnsOk()
+        {
+            // Arrange
+            using var context = TestDatabaseFixture.CreateDbContext();
+            
+            var user = new User
+            {
+                Id = 12,
+                FullName = "Franklin Raj",
+                Email = "franklin@mcc.edu",
+                Username = "mcc_franklin_123",
+                RegisterNumber = "mcc-5678"
+            };
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+
+            var controller = new PublicController(context);
+
+            // Act
+            var result = await controller.GetPortfolioByUsername("mcc_franklin_123");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var json = System.Text.Json.JsonSerializer.Serialize(okResult.Value);
+            using var document = System.Text.Json.JsonDocument.Parse(json);
+            var parsed = document.RootElement;
+            Assert.Equal("Franklin Raj", parsed.GetProperty("user").GetProperty("FullName").GetString());
+        }
+
+        [Fact]
         public async Task GetPortfolioByUsername_UserDoesNotExist_ReturnsNotFound()
         {
             // Arrange

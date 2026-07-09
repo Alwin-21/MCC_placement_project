@@ -1,4 +1,5 @@
 using MCCPortfolioAPI.Data;
+using MCCPortfolioAPI.Models;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,14 @@ namespace MCCPortfolioAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetLeaderboard()
         {
-            var users = await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Join(_context.Profiles,
+                    u => u.Id,
+                    p => p.UserId,
+                    (u, p) => new { User = u, Profile = p })
+                .Where(x => x.Profile.IsApproved && x.User.IsActive && x.User.Role == UserRole.Student)
+                .Select(x => x.User)
+                .ToListAsync();
 
             var leaderboard = new List<object>();
 

@@ -28,22 +28,26 @@ import {
   Phone,
   BookOpen,
   Link,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  X
 } from "lucide-react";
 import api from "@/services/api";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // Theme states
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+  const [themeMode, toggleThemeMode] = useTheme();
   const [selectedTheme, setSelectedTheme] = useState("Academic");
   const [availableThemes, setAvailableThemes] = useState<any[]>([]);
 
   // Notifications
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
 
   // File uploading loader
   const [uploadingField, setUploadingField] = useState<string | null>(null);
@@ -95,6 +99,7 @@ export default function DashboardPage() {
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [academicInstitution, setAcademicInstitution] = useState("");
   const [academicDegree, setAcademicDegree] = useState("");
+  const [academicDegreeType, setAcademicDegreeType] = useState("");
   const [academicField, setAcademicField] = useState("");
   const [academicGrade, setAcademicGrade] = useState("");
   const [academicStartYear, setAcademicStartYear] = useState<number | string>("");
@@ -151,6 +156,9 @@ export default function DashboardPage() {
   // SECTION 9, 10, 11: LANGUAGES, TEST SCORES, PATENTS
   // ==========================================
   const [languages, setLanguages] = useState("");
+  const [languageList, setLanguageList] = useState<{ name: string; level: string }[]>([]);
+  const [newLanguageName, setNewLanguageName] = useState("");
+  const [newLanguageLevel, setNewLanguageLevel] = useState("Fluent");
   const [testScores, setTestScores] = useState("");
   const [patents, setPatents] = useState("");
 
@@ -168,6 +176,7 @@ export default function DashboardPage() {
   const [resumeTitle, setResumeTitle] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const [editingResumeId, setEditingResumeId] = useState<number | null>(null);
+  const [previewResumeUrl, setPreviewResumeUrl] = useState<string | null>(null);
 
   // Default themes if backend does not load them
   const defaultThemes = [
@@ -218,10 +227,7 @@ export default function DashboardPage() {
     }
 
     if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("studentThemeMode") as "light" | "dark";
-      if (savedTheme) {
-        setThemeMode(savedTheme);
-      }
+      // Theme is now handled by the shared useTheme hook (mcc-theme key)
     }
 
     loadAllData();
@@ -245,13 +251,7 @@ export default function DashboardPage() {
   // ==========================================
   // API HELPERS & HANDLERS
   // ==========================================
-  const toggleThemeMode = () => {
-    const nextTheme = themeMode === "dark" ? "light" : "dark";
-    setThemeMode(nextTheme);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("studentThemeMode", nextTheme);
-    }
-  };
+  // toggleThemeMode is now provided by useTheme hook — no local implementation needed
 
   const fetchNotifications = async () => {
     try {
@@ -332,7 +332,23 @@ export default function DashboardPage() {
         setYearOfStudy(res.data.yearOfStudy || "");
         setCurrentLocation(res.data.currentLocation || "");
         setPhone(res.data.phone || "");
-        setLanguages(res.data.languages || "");
+        
+        const langStr = res.data.languages || "";
+        setLanguages(langStr);
+        if (langStr) {
+          const parsed = langStr.split(",").map((item: string) => {
+            const trimmed = item.trim();
+            const match = trimmed.match(/^([^(]+)\s*\(([^)]+)\)$/);
+            if (match) {
+              return { name: match[1].trim(), level: match[2].trim() };
+            }
+            return { name: trimmed, level: "Fluent" };
+          });
+          setLanguageList(parsed);
+        } else {
+          setLanguageList([]);
+        }
+
         setTestScores(res.data.testScores || "");
         setPatents(res.data.patents || "");
         setInstagramUrl(res.data.instagramUrl || "");
@@ -345,6 +361,22 @@ export default function DashboardPage() {
   };
 
   const saveProfile = async () => {
+    if (!fullName.trim()) {
+      alert("Full Name is a required field.");
+      return;
+    }
+    if (!course.trim()) {
+      alert("Course is a required field.");
+      return;
+    }
+    if (!yearOfStudy.trim()) {
+      alert("Year of Study is a required field.");
+      return;
+    }
+    if (!phone.trim()) {
+      alert("Phone Number is a required field.");
+      return;
+    }
     try {
       await api.post("/Profiles", {
         fullName,
@@ -383,6 +415,30 @@ export default function DashboardPage() {
     }
   };
 
+  const addLanguage = () => {
+    if (!newLanguageName.trim()) {
+      alert("Please enter a language name.");
+      return;
+    }
+    if (languageList.some(l => l.name.toLowerCase() === newLanguageName.trim().toLowerCase())) {
+      alert("This language is already added.");
+      return;
+    }
+    const updatedList = [...languageList, { name: newLanguageName.trim(), level: newLanguageLevel }];
+    setLanguageList(updatedList);
+    const serialized = updatedList.map(item => `${item.name} (${item.level})`).join(", ");
+    setLanguages(serialized);
+    setNewLanguageName("");
+    setNewLanguageLevel("Fluent");
+  };
+
+  const removeLanguage = (indexToRemove: number) => {
+    const updatedList = languageList.filter((_, idx) => idx !== indexToRemove);
+    setLanguageList(updatedList);
+    const serialized = updatedList.map(item => `${item.name} (${item.level})`).join(", ");
+    setLanguages(serialized);
+  };
+
   // ==========================================
   // EXPERIENCE API (CRUD)
   // ==========================================
@@ -396,6 +452,18 @@ export default function DashboardPage() {
   };
 
   const addExperience = async () => {
+    if (!expTitle.trim()) {
+      alert("Job Title / Role is a required field.");
+      return;
+    }
+    if (!expCompany.trim()) {
+      alert("Company / Organization is a required field.");
+      return;
+    }
+    if (!expStartDate) {
+      alert("Start Date is a required field.");
+      return;
+    }
     try {
       const payload = {
         title: expTitle,
@@ -423,14 +491,33 @@ export default function DashboardPage() {
     }
   };
 
+  const formatDateForInput = (dateStr: string) => {
+    if (!dateStr) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split("T")[0];
+    }
+    return "";
+  };
+
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    return dateStr;
+  };
+
   const startEditExperience = (item: any) => {
     setEditingExpId(item.id);
     setExpTitle(item.title);
     setExpCompany(item.company);
     setExpLocation(item.location);
     setExpDesc(item.description);
-    setExpStartDate(item.startDate);
-    setExpEndDate(item.endDate);
+    setExpStartDate(formatDateForInput(item.startDate));
+    setExpEndDate(formatDateForInput(item.endDate));
     setExpIsCurrent(item.isCurrent);
     setExpCategory(item.category || "Full-time jobs");
   };
@@ -470,6 +557,26 @@ export default function DashboardPage() {
   };
 
   const addAcademicRecord = async () => {
+    if (!academicDegree.trim()) {
+      alert("Degree is a required field.");
+      return;
+    }
+    if (!academicInstitution.trim()) {
+      alert("College / University Name is a required field.");
+      return;
+    }
+    if (!academicGrade.trim()) {
+      alert("Grade / CGPA is a required field.");
+      return;
+    }
+    if (!academicStartYear) {
+      alert("Start Year is a required field.");
+      return;
+    }
+    if (!academicEndYear) {
+      alert("End Year is a required field.");
+      return;
+    }
     try {
       const payload = {
         institution: academicInstitution,
@@ -500,6 +607,11 @@ export default function DashboardPage() {
     setEditingAcademicId(item.id);
     setAcademicInstitution(item.institution);
     setAcademicDegree(item.degree);
+    if (["10th Marksheet", "11th Marksheet", "12th Marksheet", "UG Marksheet", "PG Marksheet"].includes(item.degree)) {
+      setAcademicDegreeType(item.degree);
+    } else {
+      setAcademicDegreeType("Other");
+    }
     setAcademicField(item.fieldOfStudy);
     setAcademicGrade(item.grade);
     setAcademicStartYear(item.startYear);
@@ -511,6 +623,7 @@ export default function DashboardPage() {
     setEditingAcademicId(null);
     setAcademicInstitution("");
     setAcademicDegree("");
+    setAcademicDegreeType("");
     setAcademicField("");
     setAcademicGrade("");
     setAcademicStartYear("");
@@ -519,7 +632,7 @@ export default function DashboardPage() {
   };
 
   const deleteAcademicRecord = async (id: number) => {
-    if (!confirm("Delete this Academic Record?")) return;
+    if (!confirm("Are you sure you want to delete this Academic Record?")) return;
     try {
       await api.delete(`/AcademicRecords/${id}`);
       fetchAcademicRecords();
@@ -542,6 +655,14 @@ export default function DashboardPage() {
   };
 
   const addAchievement = async () => {
+    if (!achievementTitle.trim()) {
+      alert("Achievement Title is a required field.");
+      return;
+    }
+    if (!achievementDate) {
+      alert("Achievement Date is a required field.");
+      return;
+    }
     try {
       const payload = {
         title: achievementTitle,
@@ -584,7 +705,7 @@ export default function DashboardPage() {
   };
 
   const deleteAchievement = async (id: number) => {
-    if (!confirm("Delete this Achievement?")) return;
+    if (!confirm("Are you sure you want to delete this Achievement?")) return;
     try {
       await api.delete(`/Achievements/${id}`);
       fetchAchievements();
@@ -616,9 +737,24 @@ export default function DashboardPage() {
   };
 
   const addProjectOrResearch = async () => {
+    if (!projTitle.trim()) {
+      alert("Project / Publication Title is a required field.");
+      return;
+    }
+    const isResearch = projCategory === "Publications" || projCategory === "Conference presentations";
+    if (isResearch && !projDate) {
+      alert("Published/Presented Date is a required field for publications.");
+      return;
+    }
+    if (!isResearch && !projTechnologies.trim()) {
+      alert("Technologies used is a required field for projects.");
+      return;
+    }
+    if (!projDescription.trim()) {
+      alert(isResearch ? "Abstract is a required field." : "Description is a required field.");
+      return;
+    }
     try {
-      const isResearch = projCategory === "Publications" || projCategory === "Conference presentations";
-      
       if (isResearch) {
         const payload = {
           title: projTitle,
@@ -690,7 +826,7 @@ export default function DashboardPage() {
   };
 
   const deleteProjectRecord = async (id: number) => {
-    if (!confirm("Delete this project?")) return;
+    if (!confirm("Are you sure you want to delete this project?")) return;
     try {
       await api.delete(`/Projects/${id}`);
       fetchProjects();
@@ -701,7 +837,7 @@ export default function DashboardPage() {
   };
 
   const deleteResearchRecord = async (id: number) => {
-    if (!confirm("Delete this publication/research record?")) return;
+    if (!confirm("Are you sure you want to delete this publication/research record?")) return;
     try {
       await api.delete(`/ResearchPapers/${id}`);
       fetchResearchPapers();
@@ -724,6 +860,10 @@ export default function DashboardPage() {
   };
 
   const addSkill = async () => {
+    if (!skillName.trim()) {
+      alert("Skill Name is a required field.");
+      return;
+    }
     try {
       const payload = {
         name: skillName,
@@ -760,7 +900,7 @@ export default function DashboardPage() {
   };
 
   const deleteSkill = async (id: number) => {
-    if (!confirm("Delete this skill?")) return;
+    if (!confirm("Are you sure you want to delete this skill?")) return;
     try {
       await api.delete(`/Skills/${id}`);
       fetchSkills();
@@ -783,6 +923,14 @@ export default function DashboardPage() {
   };
 
   const addCertification = async () => {
+    if (!certificationTitle.trim()) {
+      alert("Certification Title is a required field.");
+      return;
+    }
+    if (!issuer.trim()) {
+      alert("Issuer is a required field.");
+      return;
+    }
     try {
       const payload = {
         title: certificationTitle,
@@ -825,7 +973,7 @@ export default function DashboardPage() {
   };
 
   const deleteCertification = async (id: number) => {
-    if (!confirm("Delete this certification?")) return;
+    if (!confirm("Are you sure you want to delete this certification?")) return;
     try {
       await api.delete(`/Certifications/${id}`);
       fetchCertifications();
@@ -848,6 +996,14 @@ export default function DashboardPage() {
   };
 
   const addResume = async () => {
+    if (!resumeTitle.trim()) {
+      alert("Resume Display Name is a required field.");
+      return;
+    }
+    if (!resumeUrl.trim()) {
+      alert("Resume File / Link URL is a required field.");
+      return;
+    }
     try {
       const payload = {
         resumeTitle,
@@ -881,7 +1037,7 @@ export default function DashboardPage() {
   };
 
   const deleteResume = async (id: number) => {
-    if (!confirm("Delete this resume?")) return;
+    if (!confirm("Are you sure you want to delete this resume?")) return;
     try {
       await api.delete(`/Resumes/${id}`);
       fetchResumes();
@@ -909,15 +1065,7 @@ export default function DashboardPage() {
   };
 
   const fetchAiAnalysis = async () => {
-    try {
-      setLoadingAi(true);
-      const response = await api.get("/AI/career-analysis");
-      setAiAnalysis(response.data);
-    } catch (error) {
-      console.error("Failed to fetch AI analysis", error);
-    } finally {
-      setLoadingAi(false);
-    }
+    // Disabled AI Adviser Section
   };
 
   const downloadReadinessReport = () => {
@@ -1026,23 +1174,18 @@ Report Generated: ${new Date().toLocaleDateString()}
   };
 
   return (
-    <div className={`min-h-screen flex transition-colors duration-300 ${
+    <div className={`h-screen overflow-hidden flex transition-colors duration-300 ${
       themeMode === "dark" ? "bg-[#0d0d12] text-white" : "bg-[#fcfaf6] text-[#0f172a]"
     }`}>
       
       {/* SIDEBAR NAVIGATION */}
-      <div className={`w-72 border-r backdrop-blur-xl sticky top-0 h-screen flex flex-col transition-colors duration-300 shrink-0 ${
+      <div className={`w-72 border-r backdrop-blur-xl sticky top-0 h-screen flex-col transition-colors duration-300 shrink-0 hidden md:flex ${
         themeMode === "dark" ? "bg-[#09090d] border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white shadow-xl"
       }`}>
         <div className="p-6 border-b border-white/10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#781c1c] flex items-center justify-center shrink-0 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f7f5f0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                <circle cx="12" cy="5" r="3" />
-                <line x1="12" y1="8" x2="12" y2="22" />
-                <line x1="6" y1="12" x2="18" y2="12" />
-                <path d="M5 12a7 7 0 0 0 14 0" />
-              </svg>
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 border border-white/20 shadow-md overflow-hidden p-0.5">
+              <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
             </div>
             <div>
               <span className="font-serif font-black text-xs tracking-tight text-white block leading-none">
@@ -1107,8 +1250,13 @@ Report Generated: ${new Date().toLocaleDateString()}
           </button>
 
           <div className="pt-4 border-t border-white/5 space-y-1">
-            <button onClick={() => scrollTo("ai-advisor-section")} className="w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl bg-[#781c1c]/10 hover:bg-[#781c1c]/20 text-[#781c1c] text-sm font-semibold text-left">
-              <Sparkles size={16} /> AI Career Advisor
+            <button
+              onClick={() => window.location.href = "/dashboard/resumes"}
+              className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${
+                themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"
+              } cursor-pointer`}
+            >
+              <Sparkles size={16} className="text-emerald-400" /> Resume Builder
             </button>
             <button onClick={() => {
               if (user?.fullName) {
@@ -1132,18 +1280,146 @@ Report Generated: ${new Date().toLocaleDateString()}
         <div className="p-4 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-3 rounded-xl text-sm font-semibold transition"
+            className="w-full flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-3 rounded-xl text-sm font-semibold transition cursor-pointer"
           >
             <LogOut size={16} /> Log Out
           </button>
         </div>
       </div>
 
-      {/* MAIN CONTAINER */}
-      <div className="flex-1 overflow-y-auto px-10 py-8 space-y-10">
+      {/* MOBILE DRAWER SIDEBAR OVERLAY */}
+      {showMobileNav && (
+        <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-xs select-none">
+          <div className={`w-72 flex flex-col p-5 animate-slideIn h-screen border-r ${
+            themeMode === "dark" ? "bg-[#09090d] border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white shadow-xl"
+          }`}>
+            <div className="flex justify-between items-center pb-4 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-white/20 shadow-sm overflow-hidden shrink-0 p-0.5">
+                  <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+                </div>
+                <div>
+                  <span className="font-serif font-black text-[10px] tracking-tight text-white block leading-none">
+                    MADRAS CHRISTIAN
+                  </span>
+                  <span className="font-serif font-black text-[10px] tracking-tight text-white block mt-0.5 leading-none">
+                    COLLEGE
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setShowMobileNav(false)} className="text-slate-400 hover:text-white cursor-pointer p-1">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <nav className="flex-1 py-4 space-y-1 overflow-y-auto scrollbar-thin">
+              <button onClick={() => { scrollTo("header-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <User size={16} className="text-[#781c1c]" /> Header Section
+              </button>
+              <button onClick={() => { scrollTo("about-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <FileText size={16} className="text-[#781c1c]" /> About Section
+              </button>
+              <button onClick={() => { scrollTo("experience-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Briefcase size={16} className="text-[#781c1c]" /> Experience
+              </button>
+              <button onClick={() => { scrollTo("academic-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Award size={16} className="text-[#781c1c]" /> Academic Details
+              </button>
+              <button onClick={() => { scrollTo("achievements-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Trophy size={16} className="text-[#781c1c]" /> Achievements
+              </button>
+              <button onClick={() => { scrollTo("projects-research-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <GitBranch size={16} className="text-[#781c1c]" /> Projects & Research
+              </button>
+              <button onClick={() => { scrollTo("skills-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Code size={16} className="text-[#781c1c]" /> Skills
+              </button>
+              <button onClick={() => { scrollTo("licenses-certifications-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Award size={16} className="text-[#781c1c]" /> Certifications
+              </button>
+              <button onClick={() => { scrollTo("languages-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Globe size={16} className="text-[#781c1c]" /> Languages known
+              </button>
+              <button onClick={() => { scrollTo("test-scores-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Award size={16} className="text-[#781c1c]" /> Test Scores
+              </button>
+              <button onClick={() => { scrollTo("patents-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <FileText size={16} className="text-[#781c1c]" /> Patents
+              </button>
+              <button onClick={() => { scrollTo("media-handles-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <Link size={16} className="text-[#781c1c]" /> Media Handles
+              </button>
+              <button onClick={() => { scrollTo("resume-section"); setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                <FileText size={16} className="text-[#781c1c]" /> Resume
+              </button>
+              
+              <div className="pt-4 border-t border-white/5 space-y-1">
+                <button
+                  onClick={() => { window.location.href = "/dashboard/resumes"; setShowMobileNav(false); }}
+                  className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${
+                    themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"
+                  } cursor-pointer`}
+                >
+                  <Sparkles size={16} className="text-emerald-400" /> Resume Builder
+                </button>
+                <button onClick={() => {
+                  if (user?.fullName) {
+                    const slug = user.fullName.replace(/\s+/g, "").toLowerCase();
+                    window.open(`/student/${slug}`, "_blank");
+                    setShowMobileNav(false);
+                  } else {
+                    alert("Please save your Header details first.");
+                  }
+                }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                  <Eye size={16} className="text-emerald-400" /> View Public Portfolio
+                </button>
+                <button onClick={() => { window.location.href = "/search"; setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                  <Globe size={16} className="text-gray-400" /> Search Students
+                </button>
+                <button onClick={() => { window.location.href = "/leaderboard"; setShowMobileNav(false); }} className={`w-full flex items-center gap-3 transition px-4 py-2.5 rounded-xl text-sm font-medium text-left ${themeMode === "dark" ? "hover:bg-white/5 text-slate-300 hover:text-white" : "hover:bg-white/10 text-slate-200 hover:text-white"} cursor-pointer`}>
+                  <Trophy size={16} className="text-gray-400" /> Leaderboard
+                </button>
+              </div>
+            </nav>
+            <div className="pt-4 border-t border-white/10">
+              <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-left hover:bg-red-500/10 text-red-400 cursor-pointer">
+                <LogOut size={16} /> Log Out
+              </button>
+            </div>
+          </div>
+          <div className="flex-1" onClick={() => setShowMobileNav(false)} />
+        </div>
+      )}
+
+      {/* RIGHT CONTENT WRAPPER */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
+        {/* MOBILE TOP HEADER BAR */}
+        <div className="sticky top-0 z-40 md:hidden flex items-center justify-between p-4 bg-white/90 dark:bg-[#09090d]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/5 select-none shadow-md shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowMobileNav(true)}
+              className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="font-serif font-black text-[#18233c] dark:text-white tracking-tight text-xs uppercase">
+              Dashboard Menu
+            </span>
+          </div>
+          <button
+            onClick={toggleThemeMode}
+            className="p-2 rounded-xl text-gray-400 hover:text-white transition cursor-pointer"
+          >
+            {themeMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
+
+        {/* MAIN CONTAINER */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-10 py-6 md:py-8 space-y-10">
+
         {/* BANNER SHOWCASE */}
-        <div className="relative rounded-3xl overflow-hidden h-44 bg-[#18233c] text-white flex items-end p-8 border border-amber-600/20 shadow-md mb-4">
+        <div className="relative rounded-3xl overflow-hidden h-36 md:h-44 bg-[#18233c] text-white flex items-end p-6 md:p-8 border border-amber-600/20 shadow-md mb-4">
           <div className="absolute inset-0 z-0">
             <img 
               src="/mcc-facade.jpg" 
@@ -1156,7 +1432,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <span className="text-[9px] uppercase font-mono font-black tracking-widest text-amber-400 bg-[#781c1c] px-3 py-1 rounded-full border border-amber-500/20 inline-block">
               {user?.stream || "General"} Stream · {user?.department || "Unassigned"}
             </span>
-            <h1 className="font-serif text-2xl md:text-3xl font-black text-white mt-2">
+            <h1 className="font-serif text-xl md:text-3xl font-black text-white mt-2 leading-tight">
               Welcome back, {fullName || user?.fullName || "Student Scholar"}
             </h1>
             <p className="text-xs text-slate-300">
@@ -1259,9 +1535,10 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             {/* Inputs */}
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Full Name</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Full Name *</label>
               <input
                 type="text"
+                required
                 placeholder="Student Full Name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -1272,9 +1549,10 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Course & Year</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Course & Year *</label>
               <input
                 type="text"
+                required
                 placeholder="e.g. B.Sc. Computer Science - III Year"
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
@@ -1309,9 +1587,10 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Contact Phone</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Contact Phone *</label>
               <input
                 type="text"
+                required
                 placeholder="e.g. +91 98765 43210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -1335,40 +1614,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             </div>
           </div>
 
-          {/* DYNAMIC THEME ENGINE IN HEADER */}
-          <div className="mt-8 pt-8 border-t border-dashed border-white/10">
-            <h4 className="text-sm font-bold text-[#781c1c] mb-4 flex items-center gap-2">
-              <Sparkles size={16} /> Select Portfolio Theme Style
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {(availableThemes.length > 0 ? availableThemes : defaultThemes).map((t: any) => {
-                const themeId = t.themeId || t.id;
-                const displayName = t.displayName || t.name;
-                return (
-                  <button
-                    key={themeId}
-                    type="button"
-                    onClick={() => setSelectedTheme(themeId)}
-                    className={`p-4 rounded-xl border text-left transition flex flex-col justify-between h-28 ${
-                      selectedTheme === themeId
-                        ? "border-[#781c1c] bg-[#781c1c]/10 shadow-lg shadow-[#781c1c]/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}
-                  >
-                    <div>
-                      <span className="font-bold text-xs block">{displayName}</span>
-                      <span className="text-[10px] opacity-60 mt-1 block leading-tight truncate">{t.description}</span>
-                    </div>
-                    {selectedTheme === themeId && (
-                      <span className="text-[#781c1c] text-[10px] font-semibold flex items-center gap-1">
-                        <CheckCircle size={10} /> Active
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+
 
           <div className="mt-6 flex justify-end">
             <button
@@ -1452,7 +1698,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Job Title / Role (e.g. Frontend Intern)"
+              required
+              placeholder="Job Title / Role (e.g. Frontend Intern) *"
               value={expTitle}
               onChange={(e) => setExpTitle(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1462,7 +1709,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="text"
-              placeholder="Company / Organization"
+              required
+              placeholder="Company / Organization *"
               value={expCompany}
               onChange={(e) => setExpCompany(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1496,10 +1744,10 @@ Report Generated: ${new Date().toLocaleDateString()}
             </select>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs opacity-60">Start Date</label>
+              <label className="text-xs opacity-60">Start Date *</label>
               <input
-                type="text"
-                placeholder="e.g. June 2025"
+                type="date"
+                required
                 value={expStartDate}
                 onChange={(e) => setExpStartDate(e.target.value)}
                 className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1511,8 +1759,7 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs opacity-60">End Date</label>
               <input
-                type="text"
-                placeholder="e.g. Present / August 2025"
+                type="date"
                 value={expEndDate}
                 disabled={expIsCurrent}
                 onChange={(e) => setExpEndDate(e.target.value)}
@@ -1575,10 +1822,10 @@ Report Generated: ${new Date().toLocaleDateString()}
                     </span>
                     <h4 className="font-bold text-base leading-tight">{exp.title}</h4>
                     <p className="text-xs opacity-75 mt-1">{exp.company} · {exp.location}</p>
-                    <p className="text-[10px] opacity-50 mt-1 font-semibold">{exp.startDate} - {exp.isCurrent ? "Present" : exp.endDate}</p>
+                    <p className="text-[10px] opacity-50 mt-1 font-semibold">{formatDisplayDate(exp.startDate)} - {exp.isCurrent ? "Present" : formatDisplayDate(exp.endDate)}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditExperience(exp)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteExperience(exp.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -1600,15 +1847,41 @@ Report Generated: ${new Date().toLocaleDateString()}
           </h3>
 
           <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <input
-              type="text"
-              placeholder="Degree (e.g. Bachelor of Science)"
-              value={academicDegree}
-              onChange={(e) => setAcademicDegree(e.target.value)}
+            <select
+              value={academicDegreeType}
+              onChange={(e) => {
+                setAcademicDegreeType(e.target.value);
+                if (e.target.value !== "Other") {
+                  setAcademicDegree(e.target.value);
+                } else {
+                  setAcademicDegree("");
+                }
+              }}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
-                themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
+                themeMode === "dark" ? "bg-[#0b0b0f] border-white/10 text-white" : "bg-white border-slate-200"
               }`}
-            />
+            >
+              <option value="">Select Qualification / Marksheet Type *</option>
+              <option value="10th Marksheet">10th Marksheet (Required)</option>
+              <option value="11th Marksheet">11th Marksheet (Required)</option>
+              <option value="12th Marksheet">12th Marksheet (Required)</option>
+              <option value="UG Marksheet">UG Marksheet (Required)</option>
+              <option value="PG Marksheet">PG Marksheet (Optional)</option>
+              <option value="Other">Other (Custom Title)</option>
+            </select>
+
+            {academicDegreeType === "Other" && (
+              <input
+                type="text"
+                required
+                placeholder="Custom Degree Title (e.g. B.Sc. Computer Science) *"
+                value={academicDegree}
+                onChange={(e) => setAcademicDegree(e.target.value)}
+                className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
+                  themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
+                }`}
+              />
+            )}
 
             <input
               type="text"
@@ -1622,7 +1895,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="text"
-              placeholder="College / University Name"
+              required
+              placeholder="College / University Name *"
               value={academicInstitution}
               onChange={(e) => setAcademicInstitution(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1632,7 +1906,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="text"
-              placeholder="Grade / CGPA (e.g. 9.45 / 94%)"
+              required
+              placeholder="Grade / CGPA (e.g. 9.45 / 94%) *"
               value={academicGrade}
               onChange={(e) => setAcademicGrade(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1642,7 +1917,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="number"
-              placeholder="Start Year"
+              required
+              placeholder="Start Year *"
               value={academicStartYear}
               onChange={(e) => setAcademicStartYear(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1652,7 +1928,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="number"
-              placeholder="End Year (or Expected)"
+              required
+              placeholder="End Year (or Expected) *"
               value={academicEndYear}
               onChange={(e) => setAcademicEndYear(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1713,7 +1990,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-50 mt-1 font-semibold">Duration: {rec.startYear} - {rec.endYear} · Grade: {rec.grade || "N/A"}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditAcademicRecord(rec)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteAcademicRecord(rec.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -1741,7 +2018,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Achievement / Award Title"
+              required
+              placeholder="Achievement / Award Title *"
               value={achievementTitle}
               onChange={(e) => setAchievementTitle(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1762,14 +2040,18 @@ Report Generated: ${new Date().toLocaleDateString()}
               <option value="Others">Others</option>
             </select>
 
-            <input
-              type="date"
-              value={achievementDate}
-              onChange={(e) => setAchievementDate(e.target.value)}
-              className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
-                themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
-              }`}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs opacity-60">Achievement Date *</label>
+              <input
+                type="date"
+                required
+                value={achievementDate}
+                onChange={(e) => setAchievementDate(e.target.value)}
+                className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
+                  themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
+                }`}
+              />
+            </div>
 
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
@@ -1835,7 +2117,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-50 mt-1 font-semibold">{ach.achievementDate ? new Date(ach.achievementDate).toLocaleDateString() : ""}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditAchievement(ach)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteAchievement(ach.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -1864,7 +2146,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Title of Project / Publication"
+              required
+              placeholder="Title of Project / Publication *"
               value={projTitle}
               onChange={(e) => setProjTitle(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1888,7 +2171,7 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="text"
-              placeholder="Technologies used / Conference details"
+              placeholder="Technologies used (Required for Projects) / Conference details"
               value={projTechnologies}
               onChange={(e) => setProjTechnologies(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1908,9 +2191,10 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             {(projCategory === "Publications" || projCategory === "Conference presentations") && (
               <div className="flex flex-col gap-1.5 md:col-span-2">
-                <label className="text-xs opacity-60">Published/Presented Date</label>
+                <label className="text-xs opacity-60">Published/Presented Date *</label>
                 <input
                   type="date"
+                  required
                   value={projDate}
                   onChange={(e) => setProjDate(e.target.value)}
                   className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -1921,7 +2205,8 @@ Report Generated: ${new Date().toLocaleDateString()}
             )}
 
             <textarea
-              placeholder="Abstract / Detailed Description of project features, research methodology and outcomes..."
+              required
+              placeholder="Abstract / Detailed Description of project features, research methodology and outcomes * (Required)"
               value={projDescription}
               onChange={(e) => setProjDescription(e.target.value)}
               className={`md:col-span-2 border rounded-xl px-4 py-3 text-sm outline-none min-h-[120px] transition ${
@@ -1955,7 +2240,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-50 mt-1 font-semibold">Tech: {proj.technologies}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditProj(proj, proj.category || "Academic projects")} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteProjectRecord(proj.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -1983,7 +2268,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-50 mt-1 font-semibold">{paper.conference} · {paper.publishedDate ? new Date(paper.publishedDate).toLocaleDateString() : ""}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditProj(paper, paper.category || "Publications")} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteResearchRecord(paper.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -2012,7 +2297,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Skill Name (e.g. React.js / Public Speaking)"
+              required
+              placeholder="Skill Name (e.g. React.js / Public Speaking) *"
               value={skillName}
               onChange={(e) => setSkillName(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -2070,7 +2356,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-60 mt-1">{skill.level}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditSkill(skill)} className="p-1 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={12} /></button>
                     <button onClick={() => deleteSkill(skill.id)} className="p-1 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={12} /></button>
                   </div>
@@ -2093,7 +2379,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Certification Title / Course Title"
+              required
+              placeholder="Certification Title / Course Title *"
               value={certificationTitle}
               onChange={(e) => setCertificationTitle(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -2103,7 +2390,8 @@ Report Generated: ${new Date().toLocaleDateString()}
 
             <input
               type="text"
-              placeholder="Issuer (e.g. AWS / Coursera / Google)"
+              required
+              placeholder="Issuer (e.g. AWS / Coursera / Google) *"
               value={issuer}
               onChange={(e) => setIssuer(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -2190,7 +2478,7 @@ Report Generated: ${new Date().toLocaleDateString()}
                     <p className="text-[10px] opacity-50 mt-1 font-semibold">{cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : ""}</p>
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button onClick={() => startEditCertification(cert)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
                     <button onClick={() => deleteCertification(cert.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
@@ -2215,17 +2503,89 @@ Report Generated: ${new Date().toLocaleDateString()}
             <Globe size={22} /> Section 9: Languages known
           </h3>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">List the languages you know (comma separated)</label>
-            <input
-              type="text"
-              placeholder="e.g. English (Fluent), Tamil (Native), Hindi (Intermediate)"
-              value={languages}
-              onChange={(e) => setLanguages(e.target.value)}
-              className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
-                themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
-              }`}
-            />
+          {/* Current Languages List */}
+          <div className="mb-6">
+            <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-2 block">
+              Your Languages
+            </label>
+            {languageList.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {languageList.map((lang, index) => (
+                  <span
+                    key={index}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                      themeMode === "dark"
+                        ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                        : "bg-[#781c1c]/5 border-[#781c1c]/15 text-[#18233c] hover:bg-[#781c1c]/10"
+                    }`}
+                  >
+                    <span>{lang.name}</span>
+                    <span className="opacity-60 font-normal">({lang.level})</span>
+                    <button
+                      type="button"
+                      onClick={() => removeLanguage(index)}
+                      className="ml-1 text-slate-400 hover:text-rose-500 transition-colors"
+                      title="Remove language"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-xs italic">No languages added yet. Add languages below.</p>
+            )}
+          </div>
+
+          {/* Add Language Form */}
+          <div className={`p-5 rounded-2xl border ${
+            themeMode === "dark" ? "bg-white/[0.02] border-white/5" : "bg-slate-50/50 border-slate-155"
+          }`}>
+            <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${
+              themeMode === "dark" ? "text-gray-300" : "text-slate-700"
+            }`}>
+              Add a Language
+            </h4>
+            
+            <div className="grid sm:grid-cols-3 gap-4 items-end">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500">Language Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. English, French, Hindi"
+                  value={newLanguageName}
+                  onChange={(e) => setNewLanguageName(e.target.value)}
+                  className={`border rounded-xl px-4 py-2.5 text-xs outline-none transition focus:border-[#781c1c] ${
+                    themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200"
+                  }`}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500">Proficiency Level</label>
+                <select
+                  value={newLanguageLevel}
+                  onChange={(e) => setNewLanguageLevel(e.target.value)}
+                  className={`border rounded-xl px-4 py-2.5 text-xs outline-none transition focus:border-[#781c1c] ${
+                    themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200"
+                  }`}
+                >
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="Fluent">Fluent</option>
+                  <option value="Native / Bilingual">Native / Bilingual</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={addLanguage}
+                className="bg-[#781c1c] hover:bg-[#5f1515] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 h-[38px] shadow-sm shadow-[#781c1c]/10"
+              >
+                <Plus size={14} /> Add Language
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 flex justify-end">
@@ -2376,7 +2736,8 @@ Report Generated: ${new Date().toLocaleDateString()}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <input
               type="text"
-              placeholder="Resume Title (e.g. Software Engineer Resume 2026)"
+              required
+              placeholder="Resume Title (e.g. Software Engineer Resume 2026) *"
               value={resumeTitle}
               onChange={(e) => setResumeTitle(e.target.value)}
               className={`border rounded-xl px-4 py-3 text-sm outline-none transition ${
@@ -2387,11 +2748,12 @@ Report Generated: ${new Date().toLocaleDateString()}
             <div className={`border rounded-2xl px-5 py-3 flex flex-col justify-center gap-2 transition ${
               themeMode === "dark" ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-200"
             }`}>
-              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Upload Resume (PDF only)</label>
+              <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-500 mb-1.5">Upload Resume (PDF only) *</label>
               <div className="flex items-center gap-4 mt-1">
                 <input
                   type="file"
                   accept=".pdf"
+                  required={!resumeUrl}
                   onChange={(e) => handleFileUpload(e, setResumeUrl, "Resume File")}
                   className="hidden"
                   id="resume-file-upload-input"
@@ -2427,131 +2789,47 @@ Report Generated: ${new Date().toLocaleDateString()}
           {/* List */}
           <div className="space-y-3">
             {resumes.map((res) => (
-              <div key={res.id} className={`border rounded-2xl p-4 flex justify-between items-center transition ${
+              <div key={res.id} className={`border rounded-2xl p-4 flex flex-col transition ${
                 themeMode === "dark" ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
               }`}>
-                <div className="flex items-center gap-3">
-                  <FileText className="text-[#781c1c] animate-pulse" size={20} />
-                  <div>
-                    <h5 className="font-bold text-sm">{res.resumeTitle}</h5>
-                    <a href={res.resumeUrl} target="_blank" className="text-[10px] text-[#781c1c] hover:underline flex items-center gap-0.5 mt-0.5">
-                      <ExternalLink size={10} /> View / Download Document
-                    </a>
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-3">
+                    <FileText className="text-[#781c1c] animate-pulse" size={20} />
+                    <div>
+                      <h5 className="font-bold text-sm">{res.resumeTitle}</h5>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <a href={res.resumeUrl} target="_blank" className="text-[10px] text-[#781c1c] hover:underline flex items-center gap-0.5">
+                          <ExternalLink size={10} /> View / Download Document
+                        </a>
+                        <button
+                          onClick={() => setPreviewResumeUrl(previewResumeUrl === res.resumeUrl ? null : res.resumeUrl)}
+                          className="text-[10px] text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0"
+                        >
+                          <Eye size={10} /> {previewResumeUrl === res.resumeUrl ? "Hide Preview" : "Preview"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => startEditResume(res)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
+                    <button onClick={() => deleteResume(res.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button onClick={() => startEditResume(res)} className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10"><Edit size={14} /></button>
-                  <button onClick={() => deleteResume(res.id)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
-                </div>
+                {previewResumeUrl === res.resumeUrl && (
+                  <div className="mt-4 w-full h-[500px] rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner">
+                    <iframe src={res.resumeUrl} className="w-full h-full" title="Resume Preview" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* ==========================================
-            AI ADVISOR SECTION
-            ========================================== */}
-        <div id="ai-advisor-section" className={`border rounded-3xl p-8 transition duration-300 ${
-          themeMode === "dark" ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-sm"
-        }`}>
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[#781c1c] to-[#18233c]">
-            <Sparkles size={22} className="text-[#781c1c]" /> AI Career Advisor
-          </h3>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Generate SOP */}
-            <div className={`border rounded-2xl p-6 transition ${
-              themeMode === "dark" ? "bg-white/[0.01] border-white/5" : "bg-slate-50 border-slate-200"
-            }`}>
-              <h4 className="font-bold text-sm mb-4">Generate SOP (AI Generator)</h4>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Target career field (e.g. ML Engineer)"
-                  value={targetCareer}
-                  onChange={(e) => setTargetCareer(e.target.value)}
-                  className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition ${
-                    themeMode === "dark" ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200"
-                  }`}
-                />
 
-                <select
-                  value={sopTone}
-                  onChange={(e) => setSopTone(e.target.value)}
-                  className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition ${
-                    themeMode === "dark" ? "bg-[#0b0b0f] border-white/10 text-white" : "bg-white border-slate-200"
-                  }`}
-                >
-                  <option value="Academic">Academic Tone</option>
-                  <option value="Professional">Professional Tone</option>
-                  <option value="Startup / Creative">Startup / Creative Tone</option>
-                </select>
-
-                <button
-                  onClick={handleGenerateSop}
-                  disabled={generatingSop || !targetCareer}
-                  className="w-full bg-[#781c1c] hover:bg-[#5f1515] text-white py-3 rounded-xl font-bold text-xs transition"
-                >
-                  {generatingSop ? "Generating Statement of Purpose..." : "Generate SOP via Gemini AI"}
-                </button>
-
-                {generatedSop && (
-                  <div className="mt-4">
-                    <label className="text-[10px] font-bold uppercase tracking-wider opacity-60">Result Statement of Purpose:</label>
-                    <textarea
-                      readOnly
-                      value={generatedSop}
-                      className="w-full border rounded-xl p-3 text-xs bg-[#0d0d12]/40 border-white/10 text-gray-300 min-h-[150px] font-mono mt-2"
-                    />
-                    <button
-                      onClick={() => {
-                        setSop(generatedSop);
-                        alert("SOP copied to your profile! Save to commit changes.");
-                      }}
-                      className="mt-2 text-xs text-[#781c1c] hover:underline font-bold"
-                    >
-                      Use this SOP in my profile
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* AI Portfolio Readiness */}
-            <div className={`border rounded-2xl p-6 transition ${
-              themeMode === "dark" ? "bg-white/[0.01] border-white/5" : "bg-slate-50 border-slate-200"
-            }`}>
-              <h4 className="font-bold text-sm mb-4">AI Readiness & Skill Gap Analysis</h4>
-              {loadingAi ? (
-                <div className="text-xs text-gray-400 animate-pulse">Analyzing portfolio variables...</div>
-              ) : aiAnalysis ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs opacity-60">Profile Completeness:</span>
-                    <span className="text-sm font-bold text-[#781c1c]">{aiAnalysis.profileCompleteness}%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs opacity-60">Skill Match:</span>
-                    <span className="text-sm font-bold text-emerald-400">{aiAnalysis.skillMatchPercentage}%</span>
-                  </div>
-                  <div className="text-xs text-gray-400 mt-2">
-                    <strong>Missing Skills:</strong> {aiAnalysis.missingSkills?.join(", ") || "None"}
-                  </div>
-                  <button
-                    onClick={downloadReadinessReport}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs transition mt-4"
-                  >
-                    Download Detailed PDF/Text Report
-                  </button>
-                </div>
-              ) : (
-                <div className="text-xs text-gray-400">Save some profile properties and achievements to get an AI career fit feedback analysis report.</div>
-              )}
-            </div>
-          </div>
         </div>
-
       </div>
     </div>
   );

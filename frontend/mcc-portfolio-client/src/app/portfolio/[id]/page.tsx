@@ -3,13 +3,30 @@
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  UserCheck,
+  Briefcase,
+  Landmark,
+  Ticket,
+  CalendarDays,
+  ClipboardList,
+  Settings,
+  Search,
+  CheckSquare,
+  Bell,
+  Power,
+  Clock,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   GitBranch,
   ExternalLink,
   AlertCircle,
   Award,
   Trophy,
   BookOpen,
-  Briefcase,
   Mail,
   MapPin,
   Star,
@@ -18,7 +35,6 @@ import {
   Cpu,
   ArrowLeft,
   Heart,
-  Palette,
   Share2,
   Download,
   Check,
@@ -26,7 +42,13 @@ import {
   User,
   Globe,
   Phone,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Home,
+  Gift,
+  Cake,
+  MoreHorizontal,
+  X,
+  Eye
 } from "lucide-react";
 import api from "@/services/api";
 
@@ -103,13 +125,17 @@ function PortfolioPageContent() {
   const [resumes, setResumes] = useState<any[]>([]);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [experiences, setExperiences] = useState<any[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
-  const [themeConfig, setThemeConfig] = useState<any>(null);
-  const [activeTheme, setActiveTheme] = useState("Academic");
-  const [currentView, setCurrentView] = useState("header-sec");
-  const [showMobileNav, setShowMobileNav] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  
+  // Custom states matching image UI components
+  const [currentView, setCurrentView] = useState("dashboard"); // mapping to sidebar
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [previewResumeUrl, setPreviewResumeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPortfolio();
@@ -121,6 +147,25 @@ function PortfolioPageContent() {
       setCurrentView(viewParam);
     }
   }, [searchParams]);
+
+  // Real-time clock matching "09:53 pm Thursday" layout
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      const formattedHours = hours.toString().padStart(2, '0');
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const day = weekdays[now.getDay()];
+      setCurrentTime(`${formattedHours}:${minutes} ${ampm}\n${day}`);
+    };
+    updateClock();
+    const timerId = setInterval(updateClock, 1000);
+    return () => clearInterval(timerId);
+  }, []);
 
   const fetchPortfolio = async () => {
     try {
@@ -137,13 +182,6 @@ function PortfolioPageContent() {
       setResumes(response.data.resumes || []);
       setAcademicRecords(response.data.academicRecords || []);
       setExperiences(response.data.experiences || []);
-      
-      if (response.data.themeConfig) {
-        setThemeConfig(response.data.themeConfig);
-      }
-      if (response.data.profile?.selectedTheme) {
-        setActiveTheme(response.data.profile.selectedTheme);
-      }
     } catch (error) {
       console.error("Failed to load portfolio details", error);
     } finally {
@@ -159,173 +197,12 @@ function PortfolioPageContent() {
     }
   };
 
-  const getThemeStyles = () => {
-    switch (activeTheme) {
-      case "Corporate":
-        return {
-          wrapper: "bg-slate-50 text-slate-800 font-sans min-h-screen",
-          header: "bg-slate-900 text-white px-10 py-12 relative overflow-hidden",
-          avatarBorder: "border-4 border-slate-700 shadow-md",
-          avatarBg: "bg-slate-800 text-white",
-          subtitle: "text-slate-300 font-semibold uppercase tracking-wider text-xs",
-          sidebar: "w-72 bg-white border-r border-slate-200 text-slate-700 sticky top-0 h-screen flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow bg-white px-10 py-10 space-y-10",
-          iconColor: "text-blue-600",
-          btnColor: "bg-blue-600 hover:bg-blue-700 text-white shadow-sm",
-          badge: "inline-block px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded border border-slate-200",
-          borderAccent: "border-l-4 border-blue-600 pl-4",
-          btnSmall: "bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold shadow-sm",
-          btnSmallSec: "text-xs text-slate-600 border border-slate-200 hover:bg-slate-50",
-          paperReadBtn: "bg-slate-900 hover:bg-slate-800 text-white text-xs px-3 py-1.5 rounded font-bold",
-          footer: "bg-slate-950 text-slate-400 px-10 py-6 text-center print:hidden",
-          navSidebar: "bg-white border border-slate-200 text-slate-700",
-          navHeader: "text-blue-600 border-blue-100",
-          navItemActive: "bg-blue-50 text-blue-700 font-bold border-l-4 border-blue-600 pl-2",
-          navItemInactive: "text-slate-600 hover:bg-slate-50 pl-3",
-          navIconActive: "text-blue-600",
-          navIconInactive: "text-slate-400",
-          mobileNavBtn: "bg-blue-600 text-white border-blue-600 hover:bg-blue-700",
-          mobileNavMenu: "bg-white border border-slate-200 text-slate-800"
-        };
-      case "Startup":
-        return {
-          wrapper: "bg-white text-neutral-800 font-sans min-h-screen",
-          header: "bg-gradient-to-r from-violet-600 to-indigo-700 text-white px-10 py-14 relative overflow-hidden",
-          avatarBorder: "border-4 border-white/20 shadow-lg",
-          avatarBg: "bg-violet-900 text-white",
-          subtitle: "text-violet-100 font-semibold tracking-wider text-xs",
-          sidebar: "w-72 bg-neutral-50 border-r border-neutral-100 text-neutral-700 sticky top-0 h-screen flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow px-10 py-10 space-y-10",
-          iconColor: "text-violet-600",
-          btnColor: "bg-violet-600 hover:bg-violet-750 text-white shadow-md",
-          badge: "inline-block px-2.5 py-0.5 bg-violet-50 text-violet-700 text-[10px] font-bold rounded-full border border-violet-100",
-          borderAccent: "border-l-4 border-violet-600 pl-4",
-          btnSmall: "bg-violet-600 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-md",
-          btnSmallSec: "text-xs text-violet-600 border border-violet-100 hover:bg-violet-50/50",
-          paperReadBtn: "bg-neutral-900 hover:bg-neutral-800 text-white text-xs px-3 py-1.5 rounded-full font-bold",
-          footer: "bg-neutral-950 text-neutral-400 px-10 py-6 text-center print:hidden",
-          navSidebar: "bg-neutral-50 border border-neutral-100 text-neutral-700",
-          navHeader: "text-violet-600 border-violet-100",
-          navItemActive: "bg-violet-50 text-violet-700 font-bold border-l-4 border-violet-600 pl-2",
-          navItemInactive: "text-neutral-600 hover:bg-neutral-100 pl-3",
-          navIconActive: "text-violet-600",
-          navIconInactive: "text-neutral-400",
-          mobileNavBtn: "bg-violet-600 text-white border-violet-600 hover:bg-violet-700",
-          mobileNavMenu: "bg-white border border-neutral-150 text-neutral-800"
-        };
-      case "Creative":
-        return {
-          wrapper: "bg-indigo-950 text-indigo-50 font-sans min-h-screen",
-          header: "bg-gradient-to-r from-teal-900 via-indigo-950 to-purple-950 text-white px-10 py-14 relative overflow-hidden border-b border-indigo-900/50",
-          avatarBorder: "border-4 border-teal-500/30 shadow-2xl",
-          avatarBg: "bg-indigo-900 text-teal-300",
-          subtitle: "text-teal-300 font-bold uppercase tracking-wider text-xs",
-          sidebar: "w-72 bg-indigo-950/60 border-r border-indigo-900/50 text-indigo-200 sticky top-0 h-screen flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow px-10 py-10 space-y-10",
-          iconColor: "text-teal-400",
-          btnColor: "bg-teal-500 hover:bg-teal-600 text-white shadow-lg",
-          badge: "inline-block px-2 py-0.5 bg-teal-50/10 text-teal-300 text-[10px] font-semibold rounded border border-teal-500/25",
-          borderAccent: "border-l-4 border-teal-500 pl-4",
-          btnSmall: "bg-teal-500 text-white text-xs px-3 py-1.5 rounded font-bold shadow-lg",
-          btnSmallSec: "text-xs text-teal-300 border border-teal-500/30 hover:bg-teal-500/10",
-          paperReadBtn: "bg-indigo-900 hover:bg-indigo-800 text-white text-xs px-3 py-1.5 rounded font-bold",
-          footer: "bg-indigo-950 text-indigo-400 px-10 py-6 text-center print:hidden",
-          navSidebar: "bg-indigo-950/40 border border-indigo-900 text-indigo-200",
-          navHeader: "text-teal-400 border-indigo-800",
-          navItemActive: "bg-teal-500/10 text-teal-300 font-bold border-l-4 border-teal-500 pl-2",
-          navItemInactive: "text-indigo-200 hover:bg-indigo-900/40 pl-3",
-          navIconActive: "text-teal-400",
-          navIconInactive: "text-indigo-450",
-          mobileNavBtn: "bg-teal-500 text-white border-teal-500 hover:bg-teal-600",
-          mobileNavMenu: "bg-indigo-950 border border-indigo-900 text-indigo-100"
-        };
-      case "AIFuturistic":
-        return {
-          wrapper: "bg-black text-gray-300 font-mono min-h-screen",
-          header: "bg-black border-b border-[#00ffcc]/20 px-10 py-16 relative overflow-hidden",
-          avatarBorder: "border-2 border-[#00ffcc] shadow-[0_0_15px_rgba(0,255,204,0.3)]",
-          avatarBg: "bg-black text-[#00ffcc]",
-          subtitle: "text-cyan-400 font-bold tracking-widest text-xs uppercase",
-          sidebar: "w-72 bg-black border-r border-[#00ffcc]/15 text-gray-400 sticky top-0 h-screen flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow px-10 py-10 space-y-10",
-          iconColor: "text-[#00ffcc]",
-          btnColor: "bg-transparent text-[#00ffcc] border border-[#00ffcc] hover:bg-[#00ffcc]/10 shadow-[0_0_10px_rgba(0,255,204,0.15)]",
-          badge: "inline-block px-2 py-0.5 bg-black text-[#00ffcc] text-[10px] font-bold rounded border border-[#00ffcc]/20",
-          borderAccent: "border-l-4 border-[#00ffcc] pl-4",
-          btnSmall: "bg-transparent text-[#00ffcc] border border-[#00ffcc]/50 text-xs px-3 py-1.5 rounded font-bold shadow-[0_0_8px_rgba(0,255,204,0.1)]",
-          btnSmallSec: "text-xs text-[#00ffcc]/80 border border-[#00ffcc]/20 hover:bg-[#00ffcc]/5",
-          paperReadBtn: "bg-transparent text-cyan-400 border border-cyan-400/50 hover:bg-cyan-400/10 text-xs px-3 py-1.5 rounded font-bold",
-          footer: "bg-black border-t border-[#00ffcc]/15 text-gray-500 px-10 py-6 text-center print:hidden",
-          navSidebar: "bg-black border border-[#00ffcc]/15 text-gray-400",
-          navHeader: "text-[#00ffcc] border-[#00ffcc]/20",
-          navItemActive: "bg-[#00ffcc]/5 text-[#00ffcc] font-bold border-l-4 border-[#00ffcc] pl-2",
-          navItemInactive: "text-gray-400 hover:bg-[#00ffcc]/5 hover:text-[#00ffcc] pl-3",
-          navIconActive: "text-[#00ffcc]",
-          navIconInactive: "text-gray-600",
-          mobileNavBtn: "bg-black text-[#00ffcc] border-[#00ffcc] hover:bg-[#00ffcc]/10",
-          mobileNavMenu: "bg-black border border-[#00ffcc]/25 text-gray-300"
-        };
-      case "LinkedIn":
-        return {
-          wrapper: "bg-[#f3f2ef] text-slate-800 font-sans min-h-screen",
-          header: "bg-white border border-slate-200 rounded-b-xl px-10 py-12 relative overflow-hidden shadow-sm max-w-5xl mx-auto mt-4",
-          avatarBorder: "border-4 border-white shadow-md",
-          avatarBg: "bg-slate-200 text-slate-700",
-          subtitle: "text-slate-500 font-semibold text-xs",
-          sidebar: "w-72 bg-white border border-slate-200 rounded-xl text-slate-700 sticky top-4 h-[calc(100vh-32px)] flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow bg-white border border-slate-200 rounded-xl p-8 space-y-10 max-w-5xl mx-auto mt-4",
-          iconColor: "text-[#0a66c2]",
-          btnColor: "bg-[#0a66c2] hover:bg-[#004182] text-white shadow-sm rounded-full font-bold",
-          badge: "inline-block px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded-full border border-slate-200",
-          borderAccent: "border-l-4 border-[#0a66c2] pl-4",
-          btnSmall: "bg-[#0a66c2] text-white text-xs px-3.5 py-1.5 rounded-full font-semibold shadow-xs",
-          btnSmallSec: "text-xs text-[#0a66c2] border border-[#0a66c2] rounded-full hover:bg-[#0a66c2]/5",
-          paperReadBtn: "bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs px-3 py-1.5 rounded-full font-semibold border border-slate-300",
-          footer: "bg-white border-t border-slate-200 text-slate-500 px-10 py-6 text-center mt-8 print:hidden",
-          navSidebar: "bg-white border border-slate-200 text-slate-700",
-          navHeader: "text-[#0a66c2] border-slate-100",
-          navItemActive: "bg-[#0a66c2]/5 text-[#0a66c2] font-bold border-l-4 border-[#0a66c2] pl-2",
-          navItemInactive: "text-slate-600 hover:bg-slate-50 pl-3",
-          navIconActive: "text-[#0a66c2]",
-          navIconInactive: "text-slate-400",
-          mobileNavBtn: "bg-[#0a66c2] text-white border-[#0a66c2] hover:bg-[#004182]",
-          mobileNavMenu: "bg-white border border-slate-200 text-slate-800"
-        };
-      default: // Academic Theme
-        return {
-          wrapper: "bg-[#faf9f6] text-[#2c2c2c] font-serif min-h-screen",
-          header: "bg-[#18233c] text-white px-10 py-14 relative overflow-hidden border-b-4 border-amber-600",
-          avatarBorder: "border-4 border-amber-600/30 shadow-md",
-          avatarBg: "bg-[#18233c] text-white",
-          subtitle: "text-amber-500 font-bold uppercase tracking-wider text-xs",
-          sidebar: "w-72 bg-white border-r border-amber-900/10 text-[#18233c] sticky top-0 h-screen flex flex-col p-6 space-y-2 shrink-0 print:hidden",
-          mainContent: "flex-grow bg-white px-10 py-10 space-y-10",
-          iconColor: "text-amber-650",
-          btnColor: "bg-amber-600 hover:bg-amber-700 text-white shadow-sm font-semibold",
-          badge: "inline-block px-2.5 py-0.5 bg-amber-50 text-amber-800 text-[10px] font-semibold rounded border border-amber-250",
-          borderAccent: "border-l-4 border-amber-600 pl-4",
-          btnSmall: "bg-amber-600 text-white text-xs px-3.5 py-1.5 rounded font-semibold shadow-sm",
-          btnSmallSec: "text-xs text-amber-700 border border-amber-200 bg-amber-50/20 hover:bg-amber-50",
-          paperReadBtn: "bg-[#18233c] hover:bg-slate-800 text-white text-xs px-3 py-1.5 rounded font-semibold",
-          footer: "bg-[#18233c] text-slate-300 px-10 py-6 text-center print:hidden",
-          navSidebar: "bg-white border border-amber-900/10 text-[#18233c]",
-          navHeader: "text-amber-600 border-amber-200",
-          navItemActive: "bg-amber-50 text-amber-900 font-bold border-l-4 border-amber-600 pl-2",
-          navItemInactive: "text-[#18233c]/80 hover:bg-amber-50/50 pl-3",
-          navIconActive: "text-amber-600",
-          navIconInactive: "text-slate-400",
-          mobileNavBtn: "bg-amber-600 text-white border-amber-600 hover:bg-amber-700",
-          mobileNavMenu: "bg-white border border-amber-900/15 text-[#18233c]"
-        };
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#07070a] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#fcfaf6] text-[#2c2c2c] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-purple-500 border-r-indigo-500 border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-gray-400 font-bold tracking-widest text-xs uppercase animate-pulse">Loading MCC Resume Portfolio...</p>
+          <div className="w-16 h-16 border-4 border-t-[#781c1c] border-r-[#18233c] border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-slate-500 font-bold tracking-widest text-xs uppercase animate-pulse">Loading MCC Resume Portfolio...</p>
         </div>
       </div>
     );
@@ -333,482 +210,844 @@ function PortfolioPageContent() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#07070a] text-white flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle size={48} className="text-red-500 mb-4 animate-bounce" />
-        <h2 className="text-xl font-bold">Portfolio Record Not Found</h2>
-        <p className="text-sm text-gray-400 mt-2">The requested student directory is empty or the URL slug is invalid.</p>
-        <button onClick={() => router.push("/search")} className="mt-6 bg-purple-600 text-white px-6 py-2.5 rounded-xl font-bold">
+      <div className="min-h-screen bg-[#fcfaf6] text-[#2c2c2c] flex flex-col items-center justify-center p-6 text-center">
+        <AlertCircle size={48} className="text-[#781c1c] mb-4 animate-bounce" />
+        <h2 className="text-xl font-bold text-[#18233c]">Portfolio Record Not Found</h2>
+        <p className="text-sm text-slate-550 mt-2">The requested student directory is empty or the URL slug is invalid.</p>
+        <button onClick={() => router.push("/search")} className="mt-6 bg-[#781c1c] hover:bg-[#5f1515] text-white px-6 py-2.5 rounded-xl font-bold transition-all">
           Search Placement Directory
         </button>
       </div>
     );
   }
 
-  const s = getThemeStyles();
   const initials = user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "ST";
 
-  // Re-map sidebar options to exactly the 13 required sections
-  const sectionsList = [
-    { id: "header-sec", label: "Full Portfolio", icon: User },
-    { id: "about-sec", label: "About Section", icon: FileText },
-    { id: "experience-sec", label: "Experience", icon: Briefcase },
-    { id: "academic-sec", label: "Academic Details", icon: Award },
-    { id: "achievements-sec", label: "Achievements", icon: Trophy },
-    { id: "projects-research-sec", label: "Projects & Research", icon: GitBranch },
-    { id: "skills-sec", label: "Skills", icon: Code2 },
-    { id: "licenses-certifications-sec", label: "Licenses & Certifications", icon: Award },
-    { id: "languages-sec", label: "Languages known", icon: Globe },
-    { id: "test-scores-sec", label: "Test Scores", icon: Award },
-    { id: "patents-sec", label: "Patents", icon: FileText },
-    { id: "media-handles-sec", label: "Other Media handles", icon: LinkIcon },
-    { id: "resume-sec", label: "Resume", icon: FileText }
+  // Sidebar list matching the student dashboard sections exactly
+  const sidebarItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, visible: true },
+    { id: "about", label: "About Section", icon: FileText, visible: !!(profile?.bio || profile?.personalStory || profile?.sop) },
+    { id: "experience", label: "Experience", icon: Briefcase, visible: experiences.length > 0 },
+    { id: "academic", label: "Academic Details", icon: Award, visible: academicRecords.length > 0 },
+    { id: "achievements", label: "Achievements", icon: Trophy, visible: achievements.length > 0 },
+    { id: "projects-research", label: "Projects & Research", icon: GitBranch, visible: projects.length > 0 || researchPapers.length > 0 },
+    { id: "skills", label: "Skills", icon: Code2, visible: skills.length > 0 },
+    { id: "licenses-certifications", label: "Licenses & Certifications", icon: Award, visible: certifications.length > 0 },
+    { id: "languages", label: "Languages known", icon: Globe, visible: !!profile?.languages?.trim() },
+    { id: "test-scores", label: "Test Scores", icon: Award, visible: !!profile?.testScores?.trim() },
+    { id: "patents", label: "Patents", icon: FileText, visible: !!profile?.patents?.trim() },
+    { id: "media-handles", label: "Other Media handles", icon: LinkIcon, visible: !!(profile?.linkedInUrl || profile?.gitHubUrl || profile?.instagramUrl || profile?.blogUrl || profile?.otherHandles) },
+    { id: "resume", label: "Resume", icon: FileText, visible: resumes.length > 0 }
+  ].filter(item => item.visible);
+
+  // Map display page titles for breadcrumbs
+  const getBreadcrumbTitle = () => {
+    const item = sidebarItems.find(item => item.id === currentView);
+    return item ? item.label : "Dashboard";
+  };
+
+  // Compile active milestones list based on the student's actual experience & education start-years
+  const timelineMilestones = [
+    ...academicRecords.map((rec) => ({
+      date: `${rec.startYear} - ${rec.endYear}`,
+      title: `${rec.degree} in ${rec.fieldOfStudy}`,
+      subtitle: rec.institution,
+      type: "education"
+    })),
+    ...experiences.map((exp) => ({
+      date: `${exp.startDate} - ${exp.isCurrent ? "Present" : exp.endDate}`,
+      title: exp.title,
+      subtitle: `${exp.company} · ${exp.location}`,
+      type: "experience"
+    }))
   ];
 
-  return (
-    <div className={s.wrapper}>
-      {/* HEADER CARD */}
-      <header className={s.header}>
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-          <div className="flex items-center gap-5">
-            {profile?.profileImageUrl ? (
-              <img src={profile.profileImageUrl} className={`w-20 h-20 rounded-full object-cover ${s.avatarBorder}`} alt={user.fullName} />
-            ) : (
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold ${s.avatarBorder} ${s.avatarBg}`}>
-                {initials}
+  // Helper to render active section content
+  const renderContent = () => {
+    switch (currentView) {
+      case "dashboard":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
+            {/* LEFT COLUMN - STUDENT BIO & CARD */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* Profile Card */}
+              <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] text-center lg:text-left">
+                <div className="flex flex-col lg:flex-row items-center gap-4">
+                  {profile?.profileImageUrl ? (
+                    <img src={profile.profileImageUrl} className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 shadow-xs" alt={user.fullName} />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-[#f0ece1] text-[#781c1c] flex items-center justify-center font-bold text-lg border border-slate-205 shadow-xs shrink-0">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="space-y-1 overflow-hidden">
+                    <h2 className="text-base font-bold text-[#18233c] leading-tight truncate">{user.fullName}</h2>
+                    {profile?.course && (
+                      <p className="text-xs text-slate-500 font-medium leading-tight truncate">
+                        {profile.course}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">
+                      Department: {user.department || "N/A"}
+                    </p>
+                    {profile?.employeeId && (
+                      <p className="text-[9px] text-slate-400 font-bold">
+                        Register ID: {profile.employeeId}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 mt-5 pt-4 flex justify-between items-center text-xs text-slate-500 font-bold px-1">
+                  <div>
+                    <span className="block text-slate-450 text-[10px] uppercase font-bold tracking-wide">Skills Arsenal</span>
+                    <span className="block text-base font-extrabold text-[#781c1c] mt-0.5">{skills.length}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-slate-450 text-[10px] uppercase font-bold tracking-wide">Projects Listed</span>
+                    <span className="block text-base font-extrabold text-[#18233c] mt-0.5">{projects.length}</span>
+                  </div>
+                </div>
               </div>
-            )}
-            <div>
-              <h2 className="text-2xl font-black tracking-tight">{user.fullName}</h2>
-              {profile?.course ? (
-                <p className={`text-xs font-semibold tracking-wide ${s.subtitle} mt-1`}>{profile.course}</p>
-              ) : (
-                <p className={`text-xs font-semibold tracking-wide ${s.subtitle} mt-1`}>{user.department} · MCC Student</p>
+
+              {/* Biography summary widget (reflecting student bio) */}
+              {profile?.bio && (
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <h3 className="text-xs font-bold text-[#18233c] uppercase tracking-wider pb-3 border-b border-slate-100 mb-3 flex items-center gap-1.5">
+                    <FileText size={14} className="text-[#781c1c]" /> Biography
+                  </h3>
+                  <p className="text-xs text-slate-650 leading-relaxed italic">
+                    "{profile.bio}"
+                  </p>
+                  {profile.personalStory && (
+                    <p className="text-[11px] text-slate-500 leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-slate-100">
+                      {profile.personalStory}
+                    </p>
+                  )}
+                </div>
               )}
-              {profile?.currentLocation && (
-                <p className="text-[10px] opacity-70 mt-1 flex items-center gap-1"><MapPin size={10} /> {profile.currentLocation}</p>
+              {/* Connected Media Handles / Contacts summary widget */}
+              {(user.email || profile?.phone || profile?.currentLocation || profile?.linkedInUrl || profile?.gitHubUrl) && (
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <h3 className="text-xs font-bold text-[#18233c] uppercase tracking-wider pb-3 border-b border-slate-100 mb-3 flex items-center gap-1.5">
+                    <LinkIcon size={14} className="text-[#781c1c]" /> Contacts & Socials
+                  </h3>
+                  <div className="space-y-2 text-xs text-slate-655">
+                    {user.email && (
+                      <div className="flex items-center gap-2 truncate">
+                        <Mail size={13} className="text-slate-400 shrink-0" />
+                        <span className="truncate">{user.email}</span>
+                      </div>
+                    )}
+                    {profile?.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone size={13} className="text-slate-400 shrink-0" />
+                        <span>{profile.phone}</span>
+                      </div>
+                    )}
+                    {profile?.currentLocation && (
+                      <div className="flex items-center gap-2">
+                        <MapPin size={13} className="text-slate-400 shrink-0" />
+                        <span>{profile.currentLocation}</span>
+                      </div>
+                    )}
+                    {profile?.linkedInUrl && (
+                      <a href={profile.linkedInUrl} target="_blank" className="flex items-center gap-2 text-blue-650 hover:underline">
+                        <Linkedin size={13} className="shrink-0" />
+                        <span>LinkedIn Profile</span>
+                      </a>
+                    )}
+                    {profile?.gitHubUrl && (
+                      <a href={profile.gitHubUrl} target="_blank" className="flex items-center gap-2 text-slate-700 hover:underline">
+                        <Github size={13} className="shrink-0" />
+                        <span>GitHub profile</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT COLUMN - DETAILED METRICS & ARRAYS */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* Row: Student stats metrics cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Academics</span>
+                  <div className="text-2xl font-extrabold text-[#18233c] mt-1.5">{academicRecords.length}</div>
+                  <span className="text-[10px] text-slate-400 font-medium">Verified Records</span>
+                </div>
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Experiences</span>
+                  <div className="text-2xl font-extrabold text-[#781c1c] mt-1.5">{experiences.length}</div>
+                  <span className="text-[10px] text-slate-400 font-medium">Jobs & Internships</span>
+                </div>
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Certifications</span>
+                  <div className="text-2xl font-extrabold text-[#d4af37] mt-1.5">{certifications.length}</div>
+                  <span className="text-[10px] text-slate-400 font-medium">Courses & Licenses</span>
+                </div>
+              </div>
+
+              {/* Projects List Card */}
+              {projects.length > 0 && (
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <h3 className="text-xs font-bold text-[#18233c] uppercase tracking-wider pb-3 border-b border-slate-100 mb-4 flex items-center justify-between">
+                    <span>Projects & Publications</span>
+                    <span className="px-2 py-0.5 text-[9px] font-extrabold text-white bg-[#781c1c] rounded-full scale-90">
+                      Real-time
+                    </span>
+                  </h3>
+                  <div className="space-y-4">
+                    {projects.slice(0, 3).map((proj, idx) => (
+                      <div key={proj.id} className="flex items-start justify-between border-b border-slate-50 last:border-0 pb-3 last:pb-0 text-xs">
+                        <div>
+                          <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
+                            {idx + 1}. {proj.title}
+                          </h4>
+                          {proj.technologies && (
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">Tech: {proj.technologies}</p>
+                          )}
+                        </div>
+                        {(proj.githubUrl || proj.liveUrl) && (
+                          <a href={proj.githubUrl || proj.liveUrl} target="_blank" className="text-blue-650 hover:underline flex items-center gap-0.5 text-[10px] font-bold shrink-0">
+                            <ExternalLink size={10} /> Link
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Timeline Card */}
+              {timelineMilestones.length > 0 && (
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <h3 className="text-xs font-bold text-[#18233c] uppercase tracking-wider pb-3 border-b border-slate-100 mb-4">Milestones & History</h3>
+                  <div className="space-y-4">
+                    {timelineMilestones.slice(0, 4).map((m, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-xs border-b border-slate-50 last:border-0 pb-3 last:pb-0">
+                        <div>
+                          <h4 className="font-bold text-slate-800">{m.title}</h4>
+                          <p className="text-[10px] text-slate-400 font-medium">{m.subtitle}</p>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-slate-500 shrink-0 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg">
+                          {m.date}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Achievements & Awards Summary */}
+              {achievements.length > 0 && (
+                <div className="bg-white border border-[#781c1c]/10 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+                  <h3 className="text-xs font-bold text-[#18233c] uppercase tracking-wider pb-3 border-b border-slate-100 mb-4">Merits & Achievements</h3>
+                  <div className="space-y-3.5">
+                    {achievements.slice(0, 3).map((ach) => (
+                      <div key={ach.id} className="relative pl-4 border-l-2 border-[#d4af37]/30 text-xs">
+                        <span className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-[#d4af37]" />
+                        <h4 className="font-bold text-slate-800">{ach.title}</h4>
+                        <p className="text-[10px] text-slate-450 leading-relaxed mt-0.5">{ach.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>
+        );
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto print:hidden">
-            <button
-              onClick={handleShare}
-              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition ${s.btnColor}`}
-            >
-              {copiedLink ? <Check size={14} /> : <Share2 size={14} />}
-              {copiedLink ? "Link Copied!" : "Share Portfolio"}
-            </button>
+      case "about":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <FileText size={16} className="text-[#781c1c]" /> About & Statement of Purpose
+            </h3>
+            <div className="space-y-5">
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Short Biography</h4>
+                <p className="text-xs text-slate-650 mt-1.5 leading-relaxed">{profile?.bio || "No biography added."}</p>
+              </div>
+
+              {profile?.personalStory && (
+                <div className="border-t border-slate-100 pt-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Personal Journey & Background</h4>
+                  <p className="text-xs text-slate-655 mt-1.5 leading-relaxed italic">"{profile.personalStory}"</p>
+                </div>
+              )}
+
+              {profile?.sop && (
+                <div className="border-t border-slate-100 pt-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Statement of Purpose</h4>
+                  <div className="text-xs text-slate-650 leading-relaxed p-4 rounded-lg bg-[#f0ece1]/45 border border-[#781c1c]/10 mt-2 whitespace-pre-line">
+                    {profile.sop}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        );
 
-        {/* Contacts details row in header */}
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10 text-xs text-slate-300">
-          <div className="flex items-center gap-2"><Mail size={14} className={s.iconColor} /> {user.email}</div>
-          {profile?.phone && <div className="flex items-center gap-2"><Phone size={14} className={s.iconColor} /> {profile.phone}</div>}
-          {profile?.linkedInUrl && (
-            <a href={profile.linkedInUrl} target="_blank" className="flex items-center gap-2 hover:text-white transition">
-              <Linkedin size={14} className={s.iconColor} /> LinkedIn Profile
-            </a>
+      case "experience":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Briefcase size={16} className="text-[#781c1c]" /> Experience History
+            </h3>
+            {experiences.length > 0 ? (
+              <div className="space-y-6">
+                {experiences.map((exp) => (
+                  <div key={exp.id} className="relative pl-5 border-l-2 border-[#18233c]/20 last:border-transparent pb-1">
+                    <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#18233c]" />
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-bold text-slate-800">{exp.title}</h4>
+                      <span className="px-2 py-0.5 text-[9px] font-bold text-[#781c1c] bg-[#781c1c]/5 rounded border border-[#781c1c]/10">
+                        {exp.category}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-500 mt-0.5">{exp.company} · {exp.location}</p>
+                    <p className="text-[9px] font-mono text-slate-400 mt-0.5">{exp.startDate} - {exp.isCurrent ? "Present" : exp.endDate}</p>
+                    <p className="text-xs text-slate-655 mt-2 whitespace-pre-line leading-relaxed">{exp.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No work experience listed.</div>
+            )}
+          </div>
+        );
+
+      case "academic":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Award size={16} className="text-[#781c1c]" /> Education Records & Degrees
+            </h3>
+            {academicRecords.length > 0 ? (
+              <div className="space-y-6">
+                {academicRecords.map((rec) => (
+                  <div key={rec.id} className="relative pl-5 border-l-2 border-[#781c1c]/20 last:border-transparent pb-1">
+                    <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#781c1c]" />
+                    <h4 className="text-xs font-bold text-slate-855 leading-snug">{rec.degree} in {rec.fieldOfStudy}</h4>
+                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">{rec.institution}</p>
+                    <p className="text-[9px] text-slate-400 font-semibold mt-0.5">
+                      Duration: {rec.startYear} - {rec.endYear} · Grade: {rec.grade || "N/A"}
+                    </p>
+                    {rec.attachmentUrl && (
+                      <a href={rec.attachmentUrl} target="_blank" className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#781c1c] hover:underline mt-2">
+                        <FileText size={10} /> View Marksheet Proof
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No academic records listed.</div>
+            )}
+          </div>
+        );
+
+      case "achievements":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Trophy size={16} className="text-[#d4af37]" /> Achievements & Ranks
+            </h3>
+            {achievements.length > 0 ? (
+              <div className="space-y-6">
+                {achievements.map((ach) => (
+                  <div key={ach.id} className="relative pl-5 border-l-2 border-[#d4af37]/20 last:border-transparent pb-1">
+                    <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#d4af37]" />
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-bold text-slate-800">{ach.title}</h4>
+                      <span className="px-2 py-0.5 text-[9px] font-bold text-[#d4af37] bg-[#d4af37]/5 rounded border border-[#d4af37]/15">
+                        {ach.category}
+                      </span>
+                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                      {ach.achievementDate ? new Date(ach.achievementDate).toLocaleDateString() : ""}
+                    </p>
+                    <p className="text-xs text-slate-655 mt-2 leading-relaxed">{ach.description}</p>
+                    {ach.achievementUrl && (
+                      <a href={ach.achievementUrl} target="_blank" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#18233c] hover:underline mt-2">
+                        <ExternalLink size={10} /> View merit document
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No achievements recorded.</div>
+            )}
+          </div>
+        );
+
+      case "projects-research":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+                <GitBranch size={16} className="text-[#781c1c]" /> Projects
+              </h3>
+              {projects.length > 0 ? (
+                <div className="space-y-6">
+                  {projects.map((proj) => (
+                    <div key={proj.id} className="relative pl-5 border-l-2 border-emerald-500/20 last:border-transparent pb-1">
+                      <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-xs font-bold text-slate-800">{proj.title}</h4>
+                        <span className="px-2 py-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 rounded border border-emerald-100">
+                          Project
+                        </span>
+                      </div>
+                      <p className="text-[9px] font-bold text-slate-500 mt-0.5">Tech stack: {proj.technologies}</p>
+                      <p className="text-xs text-slate-655 mt-2 leading-relaxed">{proj.description}</p>
+                      {(proj.githubUrl || proj.liveUrl) && (
+                        <a href={proj.githubUrl || proj.liveUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline mt-2">
+                          <ExternalLink size={10} /> View Project Link
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs text-slate-400 text-center py-6">No projects listed.</div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 pt-6">
+              <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+                <GitBranch size={16} className="text-[#781c1c]" /> Research Publications
+              </h3>
+              {researchPapers.length > 0 ? (
+                <div className="space-y-6">
+                  {researchPapers.map((paper) => (
+                    <div key={paper.id} className="relative pl-5 border-l-2 border-purple-500/20 last:border-transparent pb-1">
+                      <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-purple-500" />
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-xs font-bold text-slate-800">{paper.title}</h4>
+                        <span className="px-2 py-0.5 text-[9px] font-bold text-purple-600 bg-purple-50 rounded border border-purple-100">
+                          Publication
+                        </span>
+                      </div>
+                      <p className="text-[9px] font-bold text-slate-500 mt-0.5">{paper.conference} · {paper.publishedDate ? new Date(paper.publishedDate).toLocaleDateString() : ""}</p>
+                      <p className="text-xs text-slate-655 mt-2 leading-relaxed italic">"{paper.abstract}"</p>
+                      {paper.paperUrl && (
+                        <a href={paper.paperUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-650 hover:underline mt-2">
+                          <ExternalLink size={10} /> Read Paper PDF
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs text-slate-400 text-center py-6">No publications listed.</div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "skills":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Code2 size={16} className="text-[#781c1c]" /> Skills Arsenal & Proficiencies
+            </h3>
+            {skills.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {skills.map((skill) => (
+                  <div key={skill.id} className="border border-slate-100 p-4 rounded-xl bg-slate-50/50 flex justify-between items-center">
+                    <div>
+                      <h4 className="font-bold text-xs text-slate-800">{skill.name}</h4>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 block">{skill.category}</span>
+                    </div>
+                    <span className="text-[9px] font-extrabold px-2 py-0.5 bg-[#781c1c]/5 text-[#781c1c] border border-[#781c1c]/15 rounded-full uppercase">
+                      {skill.level}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No skills listed yet.</div>
+            )}
+          </div>
+        );
+
+      case "licenses-certifications":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Award size={16} className="text-[#781c1c]" /> Licenses & Certifications
+            </h3>
+            {certifications.length > 0 ? (
+              <div className="space-y-6">
+                {certifications.map((cert) => (
+                  <div key={cert.id} className="relative pl-5 border-l-2 border-[#781c1c]/25 last:border-transparent pb-1">
+                    <span className="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#781c1c]" />
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-bold text-slate-800">{cert.title}</h4>
+                      <span className="px-2 py-0.5 text-[9px] font-bold text-[#781c1c] bg-[#781c1c]/5 rounded border border-[#781c1c]/10">
+                        {cert.category}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">{cert.issuer}</p>
+                    <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                      Issued: {cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : ""}
+                    </p>
+                    {cert.certificateUrl && (
+                      <a href={cert.certificateUrl} target="_blank" className="inline-flex items-center gap-1 text-[10px] font-bold text-[#18233c] hover:underline mt-2">
+                        <ExternalLink size={10} /> View certification document
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No certifications listed.</div>
+            )}
+          </div>
+        );
+
+      case "languages":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Globe size={16} className="text-[#18233c]" /> Languages Known
+            </h3>
+            {profile?.languages ? (
+              <div className="flex flex-wrap gap-2">
+                {profile.languages.split(",").map((l: string, i: number) => (
+                  <span key={i} className="px-3 py-1.5 bg-[#f0ece1]/50 border border-[#781c1c]/10 text-xs font-semibold rounded-lg text-[#18233c]">
+                    {l.trim()}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No languages listed.</div>
+            )}
+          </div>
+        );
+
+      case "test-scores":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <Award size={16} className="text-[#781c1c]" /> Standardized Test Scores
+            </h3>
+            {profile?.testScores ? (
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg text-xs leading-relaxed text-slate-655 whitespace-pre-line">
+                {profile.testScores}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No test scores recorded.</div>
+            )}
+          </div>
+        );
+
+      case "patents":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <FileText size={16} className="text-[#781c1c]" /> Patents
+            </h3>
+            {profile?.patents ? (
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg text-xs leading-relaxed text-slate-655 whitespace-pre-line">
+                {profile.patents}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No patents listed.</div>
+            )}
+          </div>
+        );
+
+      case "media-handles":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-4 flex items-center gap-2">
+              <LinkIcon size={16} className="text-[#781c1c]" /> Connected Social Handles
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {profile?.linkedInUrl && (
+                <a href={profile.linkedInUrl} target="_blank" className="border border-slate-205 p-4 rounded-xl flex items-center gap-3 bg-slate-50/50 hover:bg-slate-50 transition">
+                  <Linkedin size={20} className="text-[#0a66c2]" />
+                  <div>
+                    <span className="font-bold text-xs text-[#18233c] block">LinkedIn Profile</span>
+                    <span className="text-[10px] text-slate-455 block mt-0.5 truncate">{profile.linkedInUrl}</span>
+                  </div>
+                </a>
+              )}
+              {profile?.gitHubUrl && (
+                <a href={profile.gitHubUrl} target="_blank" className="border border-slate-205 p-4 rounded-xl flex items-center gap-3 bg-slate-50/50 hover:bg-slate-50 transition">
+                  <Github size={20} className="text-slate-850" />
+                  <div>
+                    <span className="font-bold text-xs text-[#18233c] block">GitHub Profile</span>
+                    <span className="text-[10px] text-slate-455 block mt-0.5 truncate">{profile.gitHubUrl}</span>
+                  </div>
+                </a>
+              )}
+              {profile?.instagramUrl && (
+                <a href={profile.instagramUrl} target="_blank" className="border border-slate-205 p-4 rounded-xl flex items-center gap-3 bg-slate-50/50 hover:bg-slate-50 transition">
+                  <InstagramIcon size={20} className="text-pink-655" />
+                  <div>
+                    <span className="font-bold text-xs text-[#18233c] block">Instagram Profile</span>
+                    <span className="text-[10px] text-slate-455 block mt-0.5 truncate">{profile.instagramUrl}</span>
+                  </div>
+                </a>
+              )}
+              {profile?.blogUrl && (
+                <a href={profile.blogUrl} target="_blank" className="border border-slate-205 p-4 rounded-xl flex items-center gap-3 bg-slate-50/50 hover:bg-slate-50 transition">
+                  <Globe size={20} className="text-emerald-600" />
+                  <div>
+                    <span className="font-bold text-xs text-[#18233c] block">Blog / Website</span>
+                    <span className="text-[10px] text-slate-455 block mt-0.5 truncate">{profile.blogUrl}</span>
+                  </div>
+                </a>
+              )}
+              {profile?.otherHandles && (
+                <div className="border border-slate-205 p-4 rounded-xl bg-slate-50/50 sm:col-span-2">
+                  <span className="font-bold text-xs text-[#18233c] block">Other Information / Handles</span>
+                  <p className="text-xs text-slate-655 mt-1 leading-relaxed">{profile.otherHandles}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "resume":
+        return (
+          <div className="bg-white border border-[#781c1c]/10 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.01)] animate-fadeIn">
+            <h3 className="text-sm font-bold text-[#18233c] pb-3 border-b border-slate-100 mb-6 flex items-center gap-2">
+              <FileText size={16} className="text-[#781c1c]" /> Official Resume Archive
+            </h3>
+            {resumes.length > 0 ? (
+              <div className="space-y-3">
+                {resumes.map((res) => (
+                  <div key={res.id} className="border border-slate-205 p-4 rounded-xl flex flex-col bg-slate-50/50">
+                    <div className="flex justify-between items-center w-full">
+                      <div className="flex items-center gap-3">
+                        <FileText className="text-blue-500" size={24} />
+                        <div>
+                          <h5 className="font-bold text-xs text-slate-800">{res.resumeTitle}</h5>
+                          <div className="flex items-center gap-3 mt-0.5">
+                            <span className="text-[10px] text-slate-450 font-bold">Verified Placement CV</span>
+                            <button
+                              onClick={() => setPreviewResumeUrl(previewResumeUrl === res.resumeUrl ? null : res.resumeUrl)}
+                              className="text-[10px] text-[#781c1c] hover:underline flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0 font-bold"
+                            >
+                              <Eye size={10} /> {previewResumeUrl === res.resumeUrl ? "Hide Preview" : "Preview"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <a href={res.resumeUrl} target="_blank" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#781c1c] hover:bg-[#5f1515] text-white rounded-lg text-xs font-bold transition shadow-xs">
+                        <Download size={12} />
+                        <span>Download</span>
+                      </a>
+                    </div>
+                    {previewResumeUrl === res.resumeUrl && (
+                      <div className="mt-4 w-full h-[500px] rounded-xl overflow-hidden border border-slate-200 shadow-inner">
+                        <iframe src={res.resumeUrl} className="w-full h-full" title="Resume Preview" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-6">No resume file uploaded yet.</div>
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="h-screen overflow-hidden bg-[#fcfaf6] text-[#2c2c2c] flex font-sans selection:bg-[#781c1c]/20 selection:text-[#781c1c]">
+      
+      {/* LEFT SIDEBAR (DESKTOP) */}
+      <aside className={`bg-[#18233c] text-slate-300 flex flex-col transition-all duration-300 shrink-0 select-none hidden md:flex border-r border-[#781c1c]/15 ${
+        isSidebarCollapsed ? "w-16" : "w-64"
+      }`}>
+        {/* Sidebar Brand Header - MCC Navy / Gold details with Logo */}
+        <div className="h-16 border-b border-slate-700/50 flex items-center gap-2.5 px-4 shrink-0">
+          {!isSidebarCollapsed && (
+            <div className="flex items-center gap-2 select-none overflow-hidden">
+              <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 border border-[#d4af37]/30 shadow-sm overflow-hidden p-0.5">
+                <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+              </div>
+              <span className="font-serif font-black text-white tracking-tight text-[10px] uppercase leading-tight">
+                <span className="text-[#d4af37] font-serif block">MADRAS</span> CHRISTIAN COLLEGE
+              </span>
+            </div>
+          )}
+          {isSidebarCollapsed && (
+            <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center mx-auto border border-[#d4af37]/30 shadow-sm overflow-hidden p-0.5" title="Madras Christian College">
+              <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+            </div>
           )}
         </div>
-      </header>
 
-      {/* BODY SIDEBAR + CONTENT SECTION */}
-      <div className="max-w-5xl mx-auto flex gap-6 py-6 px-4 md:px-0">
-        
-        {/* SIDEBAR NAVIGATION */}
-        <nav className={`w-72 bg-white/5 border border-white/10 rounded-2xl flex flex-col p-4 space-y-1 sticky top-6 h-[calc(100vh-48px)] shrink-0 print:hidden ${s.navSidebar}`}>
-          {sectionsList.map((item) => {
+        {/* Student Mini Avatar Card */}
+        <div className={`p-4 border-b border-slate-700/30 flex items-center gap-3 ${
+          isSidebarCollapsed ? "justify-center" : ""
+        }`}>
+          {profile?.profileImageUrl ? (
+            <img src={profile.profileImageUrl} className="w-8 h-8 rounded-full object-cover border border-[#d4af37]/40" alt={user.fullName} />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-[#781c1c] text-white flex items-center justify-center text-xs font-bold border border-amber-600/30">
+              {initials}
+            </div>
+          )}
+          {!isSidebarCollapsed && (
+            <div className="overflow-hidden">
+              <h4 className="text-[11px] font-bold text-white truncate max-w-[130px] flex items-center gap-1.5">
+                {user.fullName}
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block shrink-0 animate-pulse" />
+              </h4>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Items */}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {sidebarItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
-                className={`w-full flex items-center gap-3 transition px-4 py-2 rounded-xl text-xs font-medium text-left ${
-                  isActive ? s.navItemActive : s.navItemInactive
-                }`}
+                className={`w-full flex items-center transition-all duration-150 px-3 py-2 rounded-lg text-xs font-bold text-left ${
+                  isActive
+                    ? "bg-[#781c1c] text-white border-l-4 border-[#d4af37] pl-2 shadow-xs"
+                    : "hover:bg-slate-800/30 hover:text-white"
+                } ${isSidebarCollapsed ? "justify-center pl-3" : ""}`}
+                title={item.label}
               >
-                <Icon size={14} className={isActive ? s.navIconActive : s.navIconInactive} />
-                <span>{item.label}</span>
+                <Icon size={14} className={`shrink-0 ${isActive ? "text-[#d4af37]" : ""}`} />
+                {!isSidebarCollapsed && <span className="ml-3 truncate">{item.label}</span>}
               </button>
             );
           })}
         </nav>
 
-        {/* CONTENT MAIN PANEL */}
-        <main className={`${s.mainContent} flex-1 bg-white/5 border border-white/10 rounded-2xl p-8`}>
-          {/* ==========================================
-              VIEW CONTROLLER
-              ========================================== */}
+        {/* Sidebar Collapse Toggle Chevron */}
+        <div className="p-3 border-t border-slate-700/50 flex justify-center">
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="w-8 h-8 rounded-lg hover:bg-slate-800/40 flex items-center justify-center text-slate-500 hover:text-white transition"
+          >
+            {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
+        </div>
+      </aside>
+
+      {/* MOBILE DRAWER SIDEBAR OVERLAY */}
+      {showMobileNav && (
+        <div className="fixed inset-0 z-50 flex md:hidden bg-[#18233c]/60 backdrop-blur-xs">
+          <div className="w-64 bg-[#18233c] text-slate-300 flex flex-col p-4 animate-slideIn">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-700/40">
+              <span className="font-serif font-black text-white tracking-widest text-xs uppercase flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#d4af37]/30 shadow-sm overflow-hidden shrink-0 p-0.5">
+                  <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+                </div>
+                <span className="text-[#d4af37]">MCC</span> PORTFOLIO
+              </span>
+              <button onClick={() => setShowMobileNav(false)} className="text-slate-400 hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 py-4 border-b border-slate-700/30">
+              {profile?.profileImageUrl ? (
+                <img src={profile.profileImageUrl} className="w-8 h-8 rounded-full object-cover border border-[#d4af37]/40" alt={user.fullName} />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[#781c1c] text-white flex items-center justify-center text-xs font-bold">
+                  {initials}
+                </div>
+              )}
+              <h4 className="text-[11px] font-bold text-white truncate max-w-[130px] flex items-center gap-1.5">
+                {user.fullName}
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+              </h4>
+            </div>
+
+            <nav className="flex-1 py-3 space-y-1 overflow-y-auto">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentView === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setCurrentView(item.id);
+                      setShowMobileNav(false);
+                    }}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-xs font-bold text-left ${
+                      isActive
+                        ? "bg-[#781c1c] text-white border-l-4 border-[#d4af37] pl-2"
+                        : "text-slate-300 hover:bg-slate-800/30 hover:text-white"
+                    }`}
+                  >
+                    <Icon size={14} className={isActive ? "text-[#d4af37]" : ""} />
+                    <span className="ml-3">{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+          <div className="flex-1" onClick={() => setShowMobileNav(false)} />
+        </div>
+      )}
+
+      {/* MAIN RIGHT PANEL CONTAINER */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        
+        {/* TOP BAR */}
+        <header className="h-16 bg-white border-b border-[#781c1c]/10 flex items-center justify-between px-6 z-10 select-none shadow-xs shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Hamburger Button for mobile */}
+            <button
+              onClick={() => setShowMobileNav(true)}
+              className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition"
+            >
+              <Menu size={18} />
+            </button>
+
+            <div>
+              <h1 className="text-sm font-extrabold text-[#18233c] tracking-tight leading-none font-serif">{getBreadcrumbTitle()}</h1>
+              <div className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider font-mono">
+                Home <span className="mx-1 text-slate-300">&gt;</span> {getBreadcrumbTitle()}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <span className="text-sm font-extrabold text-[#18233c] tracking-tight font-serif uppercase truncate max-w-[120px] sm:max-w-[200px] md:max-w-none" title={user.fullName}>
+              {user.fullName}
+            </span>
+          </div>
+        </header>
+
+        {/* DASHBOARD CONTENT BODY */}
+        <main className="flex-1 p-6 overflow-y-auto max-w-7xl w-full mx-auto space-y-6">
           
-          {/* CASE 1: FULL VIEW / HEADER */}
-          {currentView === "header-sec" && (
-            <div className="space-y-8 animate-fadeIn">
-              {/* About short summary */}
-              <div>
-                <h3 className="text-lg font-bold border-b pb-2 mb-3">About Summary</h3>
-                <p className="text-sm opacity-80 leading-relaxed italic">"{profile?.bio || "No summary provided."}"</p>
-              </div>
+          {/* Welcome greeting banner */}
+          <div className="flex justify-between items-center pb-2">
+            <h1 className="text-base font-extrabold text-[#18233c] font-serif">
+              Welcome {user.fullName?.split(" ")[0] || "Praveen"}
+            </h1>
+          </div>
 
-              {/* Quick statistics/meta */}
-              <div className="grid grid-cols-2 gap-4 border border-dashed border-white/10 p-5 rounded-2xl bg-white/[0.01]">
-                <div>
-                  <span className="text-[10px] uppercase opacity-55 font-bold block">Course / Year</span>
-                  <span className="text-sm font-bold mt-1 block">{profile?.course || user.department}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase opacity-55 font-bold block">CGPA Score</span>
-                  <span className="text-sm font-bold mt-1 block">{profile?.cgpa || "N/A"} CGPA</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase opacity-55 font-bold block">Current Location</span>
-                  <span className="text-sm font-bold mt-1 block">{profile?.currentLocation || "N/A"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase opacity-55 font-bold block">Connected Handles</span>
-                  <span className="text-xs font-bold mt-1 block flex items-center gap-1.5">
-                    {profile?.gitHubUrl && <Github size={12} />}
-                    {profile?.linkedInUrl && <Linkedin size={12} />}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* CASE 2: ABOUT DETAILS */}
-          {currentView === "about-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><FileText size={18} /> About Summary</h3>
-              
-              <div>
-                <h4 className="text-xs font-bold uppercase opacity-60">Short Bio</h4>
-                <p className="text-sm leading-relaxed mt-2">{profile?.bio || "No summary added."}</p>
-              </div>
-
-              {profile?.personalStory && (
-                <div className="pt-4">
-                  <h4 className="text-xs font-bold uppercase opacity-60">Personal Journey & Background</h4>
-                  <p className="text-sm leading-relaxed mt-2 whitespace-pre-line italic">"{profile.personalStory}"</p>
-                </div>
-              )}
-
-              {profile?.sop && (
-                <div className="pt-4">
-                  <h4 className="text-xs font-bold uppercase opacity-60">Statement of Purpose</h4>
-                  <div className="text-xs leading-relaxed p-4 rounded-xl border border-white/5 bg-white/[0.01] mt-2 whitespace-pre-line">
-                    {profile.sop}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 3: EXPERIENCE */}
-          {currentView === "experience-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Briefcase size={18} /> Experience Records</h3>
-              {experiences.length > 0 ? (
-                <div className="space-y-6">
-                  {experiences.map((exp) => (
-                    <div key={exp.id} className={`${s.borderAccent} pl-4`}>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
-                        {exp.category}
-                      </span>
-                      <h4 className="font-bold text-base leading-snug">{exp.title}</h4>
-                      <p className="text-xs opacity-75 mt-1">{exp.company} · {exp.location}</p>
-                      <p className="text-[10px] opacity-50 mt-1 font-mono">{exp.startDate} - {exp.isCurrent ? "Present" : exp.endDate}</p>
-                      <p className="text-xs opacity-70 mt-2 leading-relaxed whitespace-pre-line">{exp.description}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No experiences listed yet.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 4: ACADEMIC DETAILS */}
-          {currentView === "academic-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Award size={18} /> Academic details</h3>
-              {academicRecords.length > 0 ? (
-                <div className="space-y-6">
-                  {academicRecords.map((rec) => (
-                    <div key={rec.id} className={`${s.borderAccent} pl-4`}>
-                      <h4 className="font-bold text-base">{rec.degree} in {rec.fieldOfStudy}</h4>
-                      <p className="text-xs opacity-75 mt-1">{rec.institution}</p>
-                      <p className="text-[10px] opacity-50 mt-1 font-semibold">Duration: {rec.startYear} - {rec.endYear} · Grade: {rec.grade || "N/A"}</p>
-                      {rec.attachmentUrl && (
-                        <a href={rec.attachmentUrl} target="_blank" className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition mt-3 ${s.btnSmallSec}`}>
-                          <FileText size={10} /> View Marksheet Proof
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No academic details listed.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 5: ACHIEVEMENTS */}
-          {currentView === "achievements-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Trophy size={18} /> Achievements</h3>
-              {achievements.length > 0 ? (
-                <div className="space-y-6">
-                  {achievements.map((ach) => (
-                    <div key={ach.id} className={`${s.borderAccent} pl-4`}>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
-                        {ach.category}
-                      </span>
-                      <h4 className="font-bold text-base leading-snug">{ach.title}</h4>
-                      <p className="text-[10px] opacity-55 mt-1 font-semibold">{ach.achievementDate ? new Date(ach.achievementDate).toLocaleDateString() : ""}</p>
-                      <p className="text-xs opacity-70 mt-2 leading-relaxed">{ach.description}</p>
-                      {ach.achievementUrl && (
-                        <a href={ach.achievementUrl} target="_blank" className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition mt-3 ${s.btnSmallSec}`}>
-                          <ExternalLink size={10} /> View Merit Document
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No achievements recorded yet.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 6: PROJECTS & RESEARCH */}
-          {currentView === "projects-research-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><GitBranch size={18} /> Projects & Research Publications</h3>
-              
-              {/* Projects List */}
-              {projects.length > 0 && (
-                <div className="space-y-6 mb-8">
-                  <h4 className="text-xs font-black uppercase tracking-widest opacity-50 mb-4">Development Projects</h4>
-                  {projects.map((proj) => (
-                    <div key={proj.id} className={`${s.borderAccent} pl-4`}>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
-                        {proj.category || "Projects"}
-                      </span>
-                      <h5 className="font-bold text-sm">{proj.title}</h5>
-                      <p className="text-[10px] opacity-50 mt-1 font-semibold">Tech stack: {proj.technologies}</p>
-                      <p className="text-xs opacity-70 mt-2 leading-relaxed">{proj.description}</p>
-                      {(proj.githubUrl || proj.liveUrl) && (
-                        <a href={proj.githubUrl || proj.liveUrl} target="_blank" className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition mt-3 ${s.btnSmallSec}`}>
-                          <ExternalLink size={10} /> Access Source/Deployment Link
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Publications List */}
-              {researchPapers.length > 0 && (
-                <div className="space-y-6">
-                  <h4 className="text-xs font-black uppercase tracking-widest opacity-50 mb-4">Publications & Scholarly Papers</h4>
-                  {researchPapers.map((paper) => (
-                    <div key={paper.id} className={`${s.borderAccent} pl-4`}>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
-                        {paper.category || "Publications"}
-                      </span>
-                      <h5 className="font-bold text-sm">{paper.title}</h5>
-                      <p className="text-[10px] opacity-50 mt-1 font-semibold">{paper.conference} · {paper.publishedDate ? new Date(paper.publishedDate).toLocaleDateString() : ""}</p>
-                      <p className="text-xs opacity-70 mt-2 leading-relaxed whitespace-pre-line italic">"{paper.abstract}"</p>
-                      {paper.paperUrl && (
-                        <a href={paper.paperUrl} target="_blank" className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition mt-3 ${s.btnSmallSec}`}>
-                          <ExternalLink size={10} /> Read Full Paper PDF
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {projects.length === 0 && researchPapers.length === 0 && (
-                <div className="text-center py-10 text-gray-500">No project or publication records uploaded.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 7: SKILLS */}
-          {currentView === "skills-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Code2 size={18} /> Skills Arsenal</h3>
-              {skills.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {skills.map((skill) => (
-                    <div key={skill.id} className="border border-white/5 bg-white/[0.01] p-4 rounded-xl">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="font-bold text-sm">{skill.name}</h4>
-                        <span className="text-[9px] px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded font-semibold uppercase">{skill.level}</span>
-                      </div>
-                      <span className="text-[9px] opacity-45 uppercase font-bold font-mono tracking-wider">{skill.category}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No skills added yet.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 8: CERTIFICATIONS */}
-          {currentView === "licenses-certifications-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Award size={18} /> Licenses & Certifications</h3>
-              {certifications.length > 0 ? (
-                <div className="space-y-6">
-                  {certifications.map((cert) => (
-                    <div key={cert.id} className={`${s.borderAccent} pl-4`}>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-bold uppercase mb-2">
-                        {cert.category}
-                      </span>
-                      <h4 className="font-bold text-base leading-snug">{cert.title}</h4>
-                      <p className="text-xs opacity-75 mt-1">{cert.issuer}</p>
-                      <p className="text-[10px] opacity-50 mt-1 font-semibold">{cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : ""}</p>
-                      {cert.certificateUrl && (
-                        <a href={cert.certificateUrl} target="_blank" className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border transition mt-3 ${s.btnSmallSec}`}>
-                          <ExternalLink size={10} /> View Credentials Document
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No certifications recorded.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 9: LANGUAGES KNOWN */}
-          {currentView === "languages-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Globe size={18} /> Languages known</h3>
-              {profile?.languages ? (
-                <div className="flex flex-wrap gap-2.5">
-                  {profile.languages.split(",").map((l: string, i: number) => (
-                    <span key={i} className="px-4 py-2 border border-white/10 bg-white/[0.02] text-xs font-semibold rounded-xl">
-                      {l.trim()}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No languages specified.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 10: TEST SCORES */}
-          {currentView === "test-scores-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><Award size={18} /> Standardized Test Scores</h3>
-              {profile?.testScores ? (
-                <div className="p-5 border border-white/5 bg-white/[0.01] rounded-2xl text-sm leading-relaxed whitespace-pre-line">
-                  {profile.testScores}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No test scores recorded.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 11: PATENTS */}
-          {currentView === "patents-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><FileText size={18} /> Patents</h3>
-              {profile?.patents ? (
-                <div className="p-5 border border-white/5 bg-white/[0.01] rounded-2xl text-sm leading-relaxed whitespace-pre-line">
-                  {profile.patents}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No patents listed.</div>
-              )}
-            </div>
-          )}
-
-          {/* CASE 12: OTHER MEDIA HANDLES */}
-          {currentView === "media-handles-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><LinkIcon size={18} /> Other Media handles</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                {profile?.instagramUrl && (
-                  <a href={profile.instagramUrl} target="_blank" className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex items-center gap-3 hover:bg-white/[0.04] transition">
-                    <InstagramIcon size={18} className="text-pink-400" />
-                    <div>
-                      <span className="font-bold text-xs block">Instagram Profile</span>
-                      <span className="text-[10px] opacity-50 block mt-0.5 truncate">{profile.instagramUrl}</span>
-                    </div>
-                  </a>
-                )}
-                
-                {profile?.blogUrl && (
-                  <a href={profile.blogUrl} target="_blank" className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex items-center gap-3 hover:bg-white/[0.04] transition">
-                    <Globe size={18} className="text-blue-400" />
-                    <div>
-                      <span className="font-bold text-xs block">Blog / Website</span>
-                      <span className="text-[10px] opacity-50 block mt-0.5 truncate">{profile.blogUrl}</span>
-                    </div>
-                  </a>
-                )}
-
-                {profile?.otherHandles && (
-                  <div className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex items-center gap-3 md:col-span-2">
-                    <LinkIcon size={18} className="text-purple-400" />
-                    <div>
-                      <span className="font-bold text-xs block">Other Social Handles</span>
-                      <p className="text-xs opacity-70 mt-1 leading-relaxed">{profile.otherHandles}</p>
-                    </div>
-                  </div>
-                )}
-
-                {!profile?.instagramUrl && !profile?.blogUrl && !profile?.otherHandles && (
-                  <div className="text-center py-10 text-gray-500 md:col-span-2">No other media handles connected.</div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* CASE 13: RESUME */}
-          {currentView === "resume-sec" && (
-            <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-lg font-bold border-b pb-2 mb-3 flex items-center gap-2"><FileText size={18} /> Resumes</h3>
-              {resumes.length > 0 ? (
-                <div className="space-y-4">
-                  {resumes.map((res) => (
-                    <div key={res.id} className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <FileText className="text-purple-400" size={20} />
-                        <div>
-                          <h5 className="font-bold text-sm">{res.resumeTitle}</h5>
-                          <a href={res.resumeUrl} target="_blank" className="text-[10px] text-purple-400 hover:underline flex items-center gap-0.5 mt-0.5">
-                            <ExternalLink size={10} /> View / Download Document
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-gray-500">No resumes uploaded.</div>
-              )}
-            </div>
-          )}
-
+          {/* Core dynamic content render */}
+          {renderContent()}
         </main>
       </div>
 
-      {/* FOOTER */}
-      <footer className={s.footer}>
-        <p className="text-[10px] font-mono tracking-widest text-inherit/50">
-          MADRAS CHRISTIAN COLLEGE · STUDENT PLACEMENT DIRECTORY · OFFICIAL VERIFIED ARCHIVE · {new Date().getFullYear()}
-        </p>
-      </footer>
     </div>
   );
 }
@@ -816,10 +1055,10 @@ function PortfolioPageContent() {
 export default function PortfolioPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#07070a] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#fcfaf6] text-[#2c2c2c] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-purple-500 border-r-indigo-500 border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-gray-400 font-bold tracking-widest text-xs uppercase animate-pulse">Loading MCC Resume Portfolio...</p>
+          <div className="w-16 h-16 border-4 border-t-[#781c1c] border-r-[#18233c] border-b-transparent border-l-transparent rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-slate-500 font-bold tracking-widest text-xs uppercase animate-pulse">Loading MCC Resume Portfolio...</p>
         </div>
       </div>
     }>

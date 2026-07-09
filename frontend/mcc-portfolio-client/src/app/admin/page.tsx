@@ -36,9 +36,12 @@ import {
   ChevronRight,
   TrendingUp,
   Sun,
-  Moon
+  Moon,
+  Menu,
+  X
 } from "lucide-react";
 import api from "@/services/api";
+import { useTheme } from "@/hooks/useTheme";
 
 type ActiveTab = 
   | "overview" 
@@ -56,7 +59,8 @@ export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [loading, setLoading] = useState(true);
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+  const [themeMode, toggleThemeMode] = useTheme();
+  const [showMobileNav, setShowMobileNav] = useState(false);
 
   // Data States
   const [metrics, setMetrics] = useState<any>(null);
@@ -81,6 +85,12 @@ export default function AdminPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<any>(null);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState("");
+  const [streamFilter, setStreamFilter] = useState("all");
+  const [deptFilter, setDeptFilter] = useState("all");
+  const [manageLoading, setManageLoading] = useState(false);
 
   // Form States - Student Create/Edit
   const [studentForm, setStudentForm] = useState({
@@ -100,7 +110,9 @@ export default function AdminPage() {
     title: "",
     message: "",
     type: "Broadcast",
-    userId: 0
+    userId: 0,
+    recipientType: "Broadcast",
+    department: ""
   });
 
   const getAdminRoleFromToken = (token: string | null): string | null => {
@@ -134,19 +146,16 @@ export default function AdminPage() {
       }
       const savedTheme = localStorage.getItem("adminThemeMode") as "light" | "dark";
       if (savedTheme) {
-        setThemeMode(savedTheme);
+        // Migrate old key to shared key on first visit
+        localStorage.setItem("mcc-theme", savedTheme);
+        localStorage.removeItem("adminThemeMode");
       }
+      // Theme is now handled by the shared useTheme hook (mcc-theme key)
     }
     loadAllData();
   }, []);
 
-  const toggleThemeMode = () => {
-    const nextTheme = themeMode === "dark" ? "light" : "dark";
-    setThemeMode(nextTheme);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("adminThemeMode", nextTheme);
-    }
-  };
+  // toggleThemeMode is now provided by useTheme hook — no local implementation needed
 
   const loadAllData = async () => {
     try {
@@ -311,6 +320,10 @@ export default function AdminPage() {
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentForm.fullName.trim() || !studentForm.registerNumber.trim() || !studentForm.email.trim() || !studentForm.department.trim()) {
+      alert("All fields (Full Name, Register Number, Email, and Department) are required.");
+      return;
+    }
     try {
       await api.post("/Admin/students", studentForm);
       alert("Student account created successfully.");
@@ -332,6 +345,10 @@ export default function AdminPage() {
   const handleEditStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStudent) return;
+    if (!studentForm.fullName.trim() || !studentForm.registerNumber.trim() || !studentForm.email.trim() || !studentForm.department.trim()) {
+      alert("All fields (Full Name, Register Number, Email, and Department) are required.");
+      return;
+    }
     try {
       await api.put(`/Admin/students/${currentStudent.id}`, studentForm);
       alert("Student account updated successfully.");
@@ -377,6 +394,52 @@ export default function AdminPage() {
       alert(`Portfolio ${!currentStatus ? "Approved" : "Revoked"} successfully.`);
     } catch (err: any) {
       alert(`Failed to change approval: ${err.response?.data?.message || err.message}`);
+    }
+  };
+
+  const openManageModal = (student: any) => {
+    setSelectedStudent(student);
+    setResetPasswordValue("");
+    setIsManageModalOpen(true);
+  };
+
+  const handleToggleActive = async (studentId: number, currentActive: boolean) => {
+    setManageLoading(true);
+    try {
+      const s = selectedStudent;
+      await api.put(`/Admin/students/${studentId}`, {
+        fullName: s.fullName,
+        email: s.email,
+        department: s.department,
+        stream: s.stream || "Aided",
+        registerNumber: s.registerNumber,
+        role: s.role || "Student",
+        isActive: !currentActive
+      });
+      setSelectedStudent({ ...selectedStudent, isActive: !currentActive });
+      await loadAllData();
+      alert(`Account ${!currentActive ? "activated" : "deactivated"} successfully.`);
+    } catch (err: any) {
+      alert(`Failed to toggle account: ${err.response?.data || err.message}`);
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const handleAdminResetPassword = async (studentId: number) => {
+    if (!resetPasswordValue.trim() || resetPasswordValue.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+    setManageLoading(true);
+    try {
+      await api.post(`/Admin/students/${studentId}/reset-password`, { password: resetPasswordValue });
+      alert("Password reset successfully.");
+      setResetPasswordValue("");
+    } catch (err: any) {
+      alert(`Failed to reset password: ${err.response?.data || err.message}`);
+    } finally {
+      setManageLoading(false);
     }
   };
 
@@ -474,23 +537,47 @@ export default function AdminPage() {
       alert("Title and message are required.");
       return;
     }
+
+    if (notifForm.recipientType === "Department" && !notifForm.department) {
+      alert("Please select a department.");
+      return;
+    }
+
+    if (notifForm.recipientType === "Individual" && !notifForm.userId) {
+      alert("Please select a target student.");
+      return;
+    }
+
     try {
-      await api.post("/Admin/notifications", {
+      const payload: any = {
         title: notifForm.title,
         message: notifForm.message,
-        type: notifForm.type,
-        userId: Number(notifForm.userId)
-      });
+      };
+
+      if (notifForm.recipientType === "Broadcast") {
+        payload.type = "Broadcast";
+        payload.userId = 0;
+      } else if (notifForm.recipientType === "Department") {
+        payload.type = "Department";
+        payload.department = notifForm.department;
+      } else {
+        payload.type = notifForm.type === "Broadcast" ? "Info" : notifForm.type;
+        payload.userId = Number(notifForm.userId);
+      }
+
+      await api.post("/Admin/notifications", payload);
       alert("Notification sent successfully.");
       setNotifForm({
         title: "",
         message: "",
         type: "Broadcast",
-        userId: 0
+        userId: 0,
+        recipientType: "Broadcast",
+        department: ""
       });
       loadAllData();
     } catch (err: any) {
-      alert(`Failed to send notification: ${err.response?.data || err.message}`);
+      alert(`Failed to send notification: ${err.response?.data?.message || err.response?.data || err.message}`);
     }
   };
 
@@ -520,13 +607,19 @@ export default function AdminPage() {
     const name = s.fullName || s.FullName || "";
     const email = s.email || s.Email || "";
     const dept = s.department || s.Department || "";
+    const stream = s.stream || s.Stream || "";
+    const regNum = s.registerNumber || s.RegisterNumber || "";
     
     const matchesSearch =
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dept.toLowerCase().includes(searchQuery.toLowerCase());
+      dept.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      regNum.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
+
+    if (streamFilter !== "all" && stream.toLowerCase() !== streamFilter.toLowerCase()) return false;
+    if (deptFilter !== "all" && dept.toLowerCase() !== deptFilter.toLowerCase()) return false;
 
     const isApproved = s.isApproved !== undefined 
       ? s.isApproved 
@@ -571,7 +664,7 @@ export default function AdminPage() {
       {/* ==========================================
           SIDEBAR NAVIGATION
           ========================================== */}
-      <div className={`w-72 border-r relative z-20 flex flex-col justify-between shrink-0 h-screen sticky top-0 transition-colors duration-300 ${
+      <div className={`w-72 border-r relative z-20 flex-col justify-between shrink-0 h-screen sticky top-0 transition-colors duration-300 hidden md:flex ${
         themeMode === "dark" ? "bg-[#09090d]/90 border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white shadow-xl"
       }`}>
         <div>
@@ -579,13 +672,8 @@ export default function AdminPage() {
           <div className={`p-6 border-b flex items-center gap-3 ${
             themeMode === "dark" ? "border-white/5" : "border-amber-600/20"
           }`}>
-            <div className="w-9 h-9 rounded-full bg-[#781c1c] flex items-center justify-center shrink-0 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f7f5f0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                <circle cx="12" cy="5" r="3" />
-                <line x1="12" y1="8" x2="12" y2="22" />
-                <line x1="6" y1="12" x2="18" y2="12" />
-                <path d="M5 12a7 7 0 0 0 14 0" />
-              </svg>
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 border border-white/20 shadow-md overflow-hidden p-0.5">
+              <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
             </div>
             <div>
               <span className="font-serif font-black text-xs tracking-tight text-white block leading-none">
@@ -630,13 +718,13 @@ export default function AdminPage() {
                     isActive
                       ? themeMode === "dark"
                         ? "bg-white text-black shadow-lg shadow-white/5 font-bold"
-                        : "bg-slate-900 text-white shadow-lg shadow-slate-900/10 font-bold"
+                        : "bg-white text-[#18233c] shadow-lg shadow-white/5 font-bold"
                       : themeMode === "dark"
-                        ? "text-gray-400 hover:text-white hover:bg-white/5"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                        ? "text-slate-400 hover:text-white hover:bg-white/5"
+                        : "text-slate-300 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  <Icon size={16} className={isActive ? (themeMode === "dark" ? "text-black" : "text-white") : (themeMode === "dark" ? "text-gray-400" : "text-slate-300")} />
+                  <Icon size={16} className={isActive ? (themeMode === "dark" ? "text-black" : "text-[#18233c]") : "text-slate-400"} />
                   {tab.label}
                 </button>
               );
@@ -646,19 +734,19 @@ export default function AdminPage() {
 
         {/* User Quick Controls */}
         <div className={`p-4 border-t space-y-3 ${
-          themeMode === "dark" ? "border-white/5" : "border-slate-200"
+          themeMode === "dark" ? "border-white/5" : "border-[#781c1c]/10"
         }`}>
           {/* Theme Mode Toggle */}
           <button
             onClick={toggleThemeMode}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition border ${
+            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
               themeMode === "dark"
                 ? "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
-                : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                : "bg-white/10 border-white/20 text-slate-200 hover:bg-white/15"
             }`}
           >
             <span className="flex items-center gap-2">
-              {themeMode === "dark" ? <Sun size={14} className="text-amber-405" /> : <Moon size={14} className="text-[#781c1c]" />}
+              {themeMode === "dark" ? <Sun size={14} className="text-amber-405" /> : <Moon size={14} className="text-[#d4af37]" />}
               {themeMode === "dark" ? "Light Mode" : "Dark Mode"}
             </span>
             <span className="text-[9px] uppercase font-mono tracking-wider opacity-60">Theme</span>
@@ -667,7 +755,7 @@ export default function AdminPage() {
           <Link
             href="/"
             className={`flex items-center justify-between text-[11px] transition px-2 ${
-              themeMode === "dark" ? "text-gray-400 hover:text-white" : "text-slate-500 hover:text-slate-900"
+              themeMode === "dark" ? "text-gray-400 hover:text-white" : "text-slate-300 hover:text-white"
             }`}
           >
             <span className="flex items-center gap-2"><ArrowLeft size={12} /> Leave Admin Panel</span>
@@ -686,11 +774,116 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* MOBILE DRAWER SIDEBAR OVERLAY */}
+      {showMobileNav && (
+        <div className="fixed inset-0 z-50 flex md:hidden bg-black/60 backdrop-blur-xs select-none">
+          <div className={`w-72 flex flex-col justify-between p-5 animate-slideIn h-screen border-r ${
+            themeMode === "dark" ? "bg-[#09090d] border-white/5 text-white" : "bg-[#18233c] border-[#781c1c]/10 text-white"
+          }`}>
+            <div>
+              <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center border border-white/20 shadow-sm overflow-hidden shrink-0 p-0.5">
+                    <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
+                  </div>
+                  <div>
+                    <span className="font-serif font-black text-[10px] tracking-tight text-white block leading-none">
+                      MADRAS CHRISTIAN
+                    </span>
+                    <span className="font-serif font-black text-[10px] tracking-tight text-white block mt-0.5 leading-none">
+                      COLLEGE
+                    </span>
+                  </div>
+                </div>
+                <button onClick={() => setShowMobileNav(false)} className="text-slate-400 hover:text-white cursor-pointer p-1">
+                  <X size={18} />
+                </button>
+              </div>
+              
+              <nav className="py-4 space-y-1.5 overflow-y-auto max-h-[60vh] scrollbar-thin">
+                {[
+                  { id: "overview", label: "Dashboard Overview", icon: Activity },
+                  { id: "students", label: "Student Directory", icon: Users },
+                  { id: "institution", label: "Institution Details", icon: Building },
+                  { id: "analytics", label: "Department Analytics", icon: BarChart2 },
+                  { id: "roles", label: "Role Configuration", icon: UserCheck },
+                  { id: "themes", label: "Theme Customization", icon: Palette },
+                  { id: "reports", label: "Analytics & Export", icon: FileText },
+                  { id: "notifications", label: "Notification Manager", icon: Bell },
+                  { id: "audit-logs", label: "Security Audit Logs", icon: Shield },
+                  { id: "backup-restore", label: "System Backup/Restore", icon: Settings }
+                ].filter((tab) => {
+                  if (adminRole === "Moderator" || adminRole === "3") {
+                    return !["roles", "audit-logs", "backup-restore"].includes(tab.id);
+                  }
+                  return true;
+                }).map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id as ActiveTab);
+                        setShowMobileNav(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
+                        isActive
+                          ? "bg-[#781c1c] text-white shadow"
+                          : "hover:bg-white/5 text-slate-350 hover:text-white"
+                      }`}
+                    >
+                      <Icon size={14} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+            
+            <div className="pt-4 border-t border-white/10 space-y-3">
+              <button
+                onClick={() => {
+                  localStorage.removeItem("adminToken");
+                  localStorage.removeItem("admin");
+                  router.push("/admin/login");
+                }}
+                className="w-full py-2.5 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition duration-200"
+              >
+                Sign Out Console
+              </button>
+            </div>
+          </div>
+          <div className="flex-1" onClick={() => setShowMobileNav(false)} />
+        </div>
+      )}
+
       {/* ==========================================
           MAIN CONTENT AREA
           ========================================== */}
-      <div className="flex-1 min-w-0 p-8 md:p-12 relative z-10 overflow-y-auto max-h-screen">
+      <div className="flex-1 min-w-0 p-4 md:p-8 lg:p-12 relative z-10 overflow-y-auto max-h-screen">
         
+        {/* MOBILE TOP HEADER BAR */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-[#09090d] border border-slate-200 dark:border-white/5 rounded-2xl select-none mb-6 shadow-xs">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowMobileNav(true)}
+              className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="font-serif font-black text-[#18233c] dark:text-white tracking-tight text-xs uppercase">
+              Admin Console
+            </span>
+          </div>
+          <button
+            onClick={toggleThemeMode}
+            className="p-2 rounded-xl text-gray-400 hover:text-white transition cursor-pointer"
+          >
+            {themeMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
+
         {/* BANNER SHOWCASE */}
         <div className="relative rounded-3xl overflow-hidden h-44 bg-[#18233c] text-white flex items-end p-8 border border-amber-600/20 shadow-md mb-8">
           <div className="absolute inset-0 z-0">
@@ -846,17 +1039,13 @@ export default function AdminPage() {
                               themeMode === "dark" ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200"
                             }`}
                           >
-                            Preview
+                            View Portfolio
                           </Link>
                           <button
-                            onClick={() => toggleApproval(student.id, studentApproved)}
-                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                              studentApproved
-                                ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/10"
-                                : "bg-emerald-500 hover:bg-emerald-600 text-black font-black"
-                            }`}
+                            onClick={() => openManageModal(student)}
+                            className="flex-1 py-2 rounded-lg text-xs font-bold bg-[#781c1c] hover:bg-[#5f1515] text-white transition"
                           >
-                            {studentApproved ? "Revoke Approval" : "Approve portfolio"}
+                            Manage
                           </button>
                         </div>
                       </div>
@@ -891,7 +1080,7 @@ export default function AdminPage() {
                   <Search size={14} className="text-gray-500 shrink-0" />
                   <input
                     type="text"
-                    placeholder="Search students by name, email, register number..."
+                    placeholder="Search by name, email, reg no..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={`bg-transparent border-none outline-none text-xs w-full ${
@@ -900,15 +1089,26 @@ export default function AdminPage() {
                   />
                 </div>
                 <select
-                  value={alumniFilter}
-                  onChange={(e) => setAlumniFilter(e.target.value as any)}
-                  className={`px-4 h-[40px] rounded-xl text-xs font-semibold outline-none border transition-colors duration-300 ${
+                  value={streamFilter}
+                  onChange={(e) => setStreamFilter(e.target.value)}
+                  className={`px-3 h-[40px] rounded-xl text-xs font-semibold outline-none border ${
                     themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-700"
                   }`}
                 >
-                  <option value="all">All Portfolios</option>
-                  <option value="active">Active Students</option>
-                  <option value="alumni">Graduated Alumni</option>
+                  <option value="all">All Streams</option>
+                  <option value="Aided">Aided</option>
+                  <option value="SFS">SFS</option>
+                </select>
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as any)}
+                  className={`px-3 h-[40px] rounded-xl text-xs font-semibold outline-none border ${
+                    themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-700"
+                  }`}
+                >
+                  <option value="all">All Status</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
                 </select>
               </div>
               <button
@@ -925,90 +1125,96 @@ export default function AdminPage() {
                 }}
                 className="inline-flex items-center gap-2 px-4 h-[40px] rounded-xl text-xs bg-[#781c1c] hover:bg-[#5f1515] text-white font-bold transition shadow-lg shadow-[#781c1c]/10"
               >
-                <Plus size={14} /> Add Student Account
+                <Plus size={14} /> Add Student
               </button>
             </div>
 
-            <div className={`overflow-x-auto border rounded-2xl ${
-              themeMode === "dark" ? "border-white/5" : "border-slate-200"
-            }`}>
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className={`border-b text-gray-400 font-bold uppercase tracking-wider ${
-                    themeMode === "dark" ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-200 text-slate-500"
-                  }`}>
-                    <th className="p-4">Reg Number</th>
-                    <th className="p-4">Full Name</th>
-                    <th className="p-4">Email</th>
-                    <th className="p-4">Department</th>
-                    <th className="p-4">Verification</th>
-                    <th className="p-4 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${
-                  themeMode === "dark" ? "divide-white/5" : "divide-slate-200"
-                }`}>
-                  {filteredStudents.length > 0 ? (
-                    filteredStudents.map((student) => (
-                      <tr key={student.id} className={themeMode === "dark" ? "hover:bg-white/[0.02] transition" : "hover:bg-slate-50 transition"}>
-                        <td className="p-4 font-mono font-bold text-[#818cf8]">{student.registerNumber || "N/A"}</td>
-                        <td className={`p-4 font-bold ${themeMode === "dark" ? "text-white" : "text-slate-900"}`}>
-                          <div className="flex items-center gap-2">
-                            <span>{student.fullName}</span>
-                            {student.isAlumni && (
-                              <span className="inline-flex items-center text-[9px] bg-[#781c1c]/10 text-[#781c1c] px-2 py-0.5 rounded-full border border-[#781c1c]/20 font-bold">
-                                Alumni '{student.graduationYear || "Grad"}'
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-4 text-gray-400">{student.email}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 border rounded text-[10px] ${
-                            themeMode === "dark" ? "bg-white/5 border-white/5 text-gray-300" : "bg-slate-100 border-slate-200 text-slate-700"
+            {/* Student count */}
+            <p className={`text-xs mb-4 ${themeMode === "dark" ? "text-gray-500" : "text-slate-400"}`}>
+              Showing {filteredStudents.length} of {students.length} students
+            </p>
+
+            {filteredStudents.length > 0 ? (
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {filteredStudents.map((student) => (
+                  <div
+                    key={student.id}
+                    className={`border rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 ${
+                      themeMode === "dark"
+                        ? "bg-[#121217]/50 border-white/5 hover:border-[#781c1c]/20"
+                        : "bg-white border-slate-200 hover:border-[#781c1c]/25 hover:shadow-md"
+                    }`}
+                  >
+                    <div>
+                      {/* Top row: dept badge + status */}
+                      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                        <span className="text-[9px] uppercase font-mono tracking-widest text-[#781c1c] font-bold bg-[#781c1c]/5 px-2 py-0.5 rounded border border-[#781c1c]/15">
+                          {student.department || "No Dept"}
+                        </span>
+                        <div className="flex gap-1.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            student.isApproved ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400 animate-pulse"
                           }`}>
-                            {student.department || "Unassigned"}
+                            {student.isApproved ? "Verified" : "Pending"}
                           </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            student.isApproved ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            student.isActive !== false ? "bg-blue-500/10 text-blue-400" : "bg-rose-500/10 text-rose-400"
                           }`}>
-                            {student.isApproved ? "Approved" : "Pending"}
+                            {student.isActive !== false ? "Active" : "Disabled"}
                           </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => openEditModal(student)}
-                              className={`p-2 rounded border transition ${
-                                themeMode === "dark" ? "bg-white/5 border-white/10 text-[#781c1c] hover:bg-white/10" : "bg-white border-slate-200 text-[#18233c] hover:bg-slate-100"
-                              }`}
-                              title="Edit details"
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteStudent(student.id, student.fullName)}
-                              className="p-2 rounded bg-rose-500/10 border border-rose-500/10 hover:bg-rose-500/25 transition text-rose-400"
-                              title="Delete account"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="p-10 text-center text-gray-500">
-                        No students found matching current filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+
+                      {/* Name */}
+                      <h4 className={`text-sm font-bold truncate leading-tight mb-0.5 ${
+                        themeMode === "dark" ? "text-white" : "text-slate-900"
+                      }`}>{student.fullName}</h4>
+                      <span className="text-[10px] font-mono text-gray-500 block mb-0.5">{student.registerNumber || "No Reg #"}</span>
+                      <span className="text-[10px] text-gray-400 block truncate mb-1">✉️ {student.email}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
+                        themeMode === "dark" ? "bg-white/5 text-gray-400" : "bg-slate-100 text-slate-500"
+                      }`}>{student.stream || "—"}</span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className={`flex gap-2 border-t pt-3.5 mt-3.5 ${
+                      themeMode === "dark" ? "border-white/5" : "border-slate-100"
+                    }`}>
+                      <button
+                        onClick={() => openManageModal(student)}
+                        className="flex-1 py-2 rounded-lg text-xs font-bold bg-[#781c1c] hover:bg-[#5f1515] text-white transition"
+                      >
+                        Manage
+                      </button>
+                      <Link
+                        href={`/portfolio/${student.id}`}
+                        target="_blank"
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold text-center border transition ${
+                          themeMode === "dark" ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-100 text-slate-800 border-slate-200"
+                        }`}
+                      >
+                        Portfolio
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id, student.fullName)}
+                        className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition"
+                        title="Delete"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`text-center py-14 border border-dashed rounded-2xl ${
+                themeMode === "dark" ? "border-white/5 bg-white/[0.01]" : "border-slate-200 bg-slate-50/50"
+              }`}>
+                <Users size={36} className="text-gray-600 mx-auto mb-3" />
+                <h4 className={`text-sm font-bold mb-1 ${themeMode === "dark" ? "text-white" : "text-slate-800"}`}>No Students Found</h4>
+                <p className="text-gray-400 text-xs">No students match your current search or filter criteria.</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -1749,39 +1955,98 @@ export default function AdminPage() {
               <form onSubmit={handleSendNotification} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Notification Type</label>
+                    <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Recipient Target</label>
                     <select
-                      value={notifForm.type}
-                      onChange={(e) => setNotifForm({ ...notifForm, type: e.target.value })}
+                      value={notifForm.recipientType}
+                      onChange={(e) => setNotifForm({ ...notifForm, recipientType: e.target.value })}
                       className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
                         themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
                       }`}
                     >
-                      <option value="Broadcast">Broadcast Announcement</option>
-                      <option value="Info">Information Message</option>
-                      <option value="Warning">Warning Alert</option>
-                      <option value="Alert">Urgent Notice</option>
+                      <option value="Broadcast">All Students (Global Broadcast)</option>
+                      <option value="Department">Filter by Department</option>
+                      <option value="Individual">Specific Student</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Target Student Audience</label>
-                    <select
-                      value={notifForm.userId}
-                      onChange={(e) => setNotifForm({ ...notifForm, userId: Number(e.target.value) })}
-                      className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
-                        themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
-                      }`}
-                    >
-                      <option value={0}>Global Broadcast (All Students)</option>
-                      {students
-                        .filter(s => s.role !== "Admin")
-                        .map(s => (
-                          <option key={s.id} value={s.id}>
-                            {s.fullName} ({s.registerNumber || s.email})
-                          </option>
-                        ))}
-                    </select>
-                  </div>
+
+                  {notifForm.recipientType === "Broadcast" && (
+                    <div>
+                      <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Alert Severity</label>
+                      <select
+                        value={notifForm.type}
+                        onChange={(e) => setNotifForm({ ...notifForm, type: e.target.value })}
+                        className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
+                          themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
+                        }`}
+                      >
+                        <option value="Broadcast">Broadcast Announcement</option>
+                        <option value="Info">Information Message</option>
+                        <option value="Warning">Warning Alert</option>
+                        <option value="Alert">Urgent Notice</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {notifForm.recipientType === "Department" && (
+                    <div>
+                      <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Target Department</label>
+                      <select
+                        value={notifForm.department}
+                        onChange={(e) => setNotifForm({ ...notifForm, department: e.target.value })}
+                        className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
+                          themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
+                        }`}
+                      >
+                        <option value="">-- Choose Department --</option>
+                        {institution?.departments
+                          ?.split(";")
+                          .filter((d: string) => d.trim().length > 0)
+                          .map((dept: string, idx: number) => (
+                            <option key={idx} value={dept}>
+                              {dept}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {notifForm.recipientType === "Individual" && (
+                    <div className="grid grid-cols-2 gap-2 col-span-2 sm:col-span-1">
+                      <div>
+                        <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Target Student</label>
+                        <select
+                          value={notifForm.userId}
+                          onChange={(e) => setNotifForm({ ...notifForm, userId: Number(e.target.value) })}
+                          className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
+                            themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
+                          }`}
+                        >
+                          <option value={0}>-- Select Student --</option>
+                          {students
+                            .filter(s => s.role !== "Admin")
+                            .map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.fullName} ({s.registerNumber || s.email})
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-mono tracking-wider font-bold text-gray-400 block mb-2">Severity</label>
+                        <select
+                          value={notifForm.type}
+                          onChange={(e) => setNotifForm({ ...notifForm, type: e.target.value })}
+                          className={`w-full border rounded-xl px-4 py-3 text-xs outline-none focus:border-[#781c1c] transition ${
+                            themeMode === "dark" ? "bg-[#121217] border-white/5 text-white" : "bg-white border-slate-200 text-slate-900"
+                          }`}
+                        >
+                          <option value="Info">Info</option>
+                          <option value="Warning">Warning</option>
+                          <option value="Alert">Urgent</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -2198,6 +2463,179 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==========================================
+          MODAL: MANAGE STUDENT
+          ========================================== */}
+      {isManageModalOpen && selectedStudent && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-[#0d0d12]/80 backdrop-blur-sm overflow-y-auto py-8 px-4">
+          <div className={`border rounded-3xl p-0 w-full max-w-2xl shadow-2xl relative overflow-hidden ${
+            themeMode === "dark" ? "bg-[#0b0b0f] border-white/10" : "bg-white border-slate-200"
+          }`}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-br from-[#781c1c] to-[#18233c] p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300">Student Management</span>
+                  <h3 className="text-xl font-bold mt-1">{selectedStudent.fullName}</h3>
+                  <p className="text-xs text-white/70 mt-0.5">
+                    {selectedStudent.registerNumber} · {selectedStudent.department} · {selectedStudent.stream}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsManageModalOpen(false)}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition text-white"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Status badges row */}
+              <div className="flex gap-2 mt-4 flex-wrap">
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold ${
+                  selectedStudent.isApproved ? "bg-emerald-400/20 text-emerald-300" : "bg-amber-400/20 text-amber-300"
+                }`}>
+                  {selectedStudent.isApproved ? "✓ Portfolio Approved" : "⏳ Pending Approval"}
+                </span>
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold ${
+                  selectedStudent.isActive !== false ? "bg-blue-400/20 text-blue-300" : "bg-rose-400/20 text-rose-300"
+                }`}>
+                  {selectedStudent.isActive !== false ? "✓ Account Active" : "✗ Account Disabled"}
+                </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-white/10 text-white/80">
+                  ✉️ {selectedStudent.email}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+
+              {/* ── ACCOUNT CONTROLS ── */}
+              <div className={`border rounded-2xl p-5 space-y-4 ${themeMode === "dark" ? "border-white/5 bg-white/[0.02]" : "border-slate-200 bg-slate-50"}`}>
+                <h4 className={`text-xs uppercase font-mono font-bold tracking-widest ${themeMode === "dark" ? "text-gray-400" : "text-slate-500"}`}>Account Controls</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => toggleApproval(selectedStudent.id, selectedStudent.isApproved)}
+                    disabled={manageLoading}
+                    className={`py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+                      selectedStudent.isApproved
+                        ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20"
+                        : "bg-emerald-500 hover:bg-emerald-600 text-black"
+                    }`}
+                  >
+                    <CheckCircle size={13} />
+                    {selectedStudent.isApproved ? "Revoke Portfolio" : "Approve Portfolio"}
+                  </button>
+                  <button
+                    onClick={() => handleToggleActive(selectedStudent.id, selectedStudent.isActive !== false)}
+                    disabled={manageLoading}
+                    className={`py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+                      selectedStudent.isActive !== false
+                        ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20"
+                        : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20"
+                    }`}
+                  >
+                    <Shield size={13} />
+                    {selectedStudent.isActive !== false ? "Deactivate Account" : "Activate Account"}
+                  </button>
+                </div>
+              </div>
+
+              {/* ── RESET PASSWORD ── */}
+              <div className={`border rounded-2xl p-5 space-y-3 ${themeMode === "dark" ? "border-white/5 bg-white/[0.02]" : "border-slate-200 bg-slate-50"}`}>
+                <h4 className={`text-xs uppercase font-mono font-bold tracking-widest ${themeMode === "dark" ? "text-gray-400" : "text-slate-500"}`}>Reset Password</h4>
+                <div className="flex gap-3">
+                  <input
+                    type="password"
+                    placeholder="Enter new password (min 6 chars)"
+                    value={resetPasswordValue}
+                    onChange={(e) => setResetPasswordValue(e.target.value)}
+                    className={`flex-1 border rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#781c1c] ${
+                      themeMode === "dark" ? "bg-[#121217] border-white/5 text-white placeholder-gray-600" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400"
+                    }`}
+                  />
+                  <button
+                    onClick={() => handleAdminResetPassword(selectedStudent.id)}
+                    disabled={manageLoading || !resetPasswordValue}
+                    className="px-4 py-2.5 rounded-xl bg-[#781c1c] hover:bg-[#5f1515] text-white text-xs font-bold transition disabled:opacity-40"
+                  >
+                    Reset
+                  </button>
+                </div>
+                <p className={`text-[10px] ${themeMode === "dark" ? "text-gray-600" : "text-slate-400"}`}>
+                  The new password will be set immediately. Student will need to use the new password on next login.
+                </p>
+              </div>
+
+              {/* ── ACTIVITY TIMELINE ── */}
+              <div className={`border rounded-2xl p-5 space-y-3 ${themeMode === "dark" ? "border-white/5 bg-white/[0.02]" : "border-slate-200 bg-slate-50"}`}>
+                <h4 className={`text-xs uppercase font-mono font-bold tracking-widest ${themeMode === "dark" ? "text-gray-400" : "text-slate-500"}`}>
+                  Activity Timeline
+                </h4>
+                {(() => {
+                  const studentLogs = auditLogs.filter(
+                    (log) => log.performedByEmail === selectedStudent.email
+                  ).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                  
+                  if (studentLogs.length === 0) {
+                    return (
+                      <p className="text-xs text-gray-500 text-center py-4">No activity recorded yet for this student.</p>
+                    );
+                  }
+                  
+                  return (
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                      {studentLogs.map((log: any, i: number) => (
+                        <div key={log.id || i} className={`flex gap-3 items-start text-xs pb-2 border-b last:border-b-0 ${themeMode === "dark" ? "border-white/5" : "border-slate-100"}`}>
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#781c1c] mt-1.5 shrink-0" />
+                          <div className="min-w-0">
+                            <span className={`font-bold block truncate ${themeMode === "dark" ? "text-white" : "text-slate-900"}`}>
+                              {log.action}
+                            </span>
+                            <span className="text-gray-500 text-[10px] block">
+                              {new Date(log.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                              {log.ipAddress && log.ipAddress !== "127.0.0.1" ? ` · ${log.ipAddress}` : ""}
+                            </span>
+                            {log.details && (
+                              <span className="text-gray-500 text-[10px] truncate block">{log.details}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* ── QUICK LINKS ── */}
+              <div className="flex gap-3 pt-1">
+                <Link
+                  href={`/portfolio/${selectedStudent.id}`}
+                  target="_blank"
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold text-center border transition ${
+                    themeMode === "dark" ? "border-white/10 text-white hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  View Public Portfolio ↗
+                </Link>
+                <button
+                  onClick={() => { openEditModal(selectedStudent); setIsManageModalOpen(false); }}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#18233c] hover:bg-[#1f2d4f] text-white text-center transition"
+                >
+                  Edit Details
+                </button>
+                <button
+                  onClick={() => { handleDeleteStudent(selectedStudent.id, selectedStudent.fullName); setIsManageModalOpen(false); }}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-center transition"
+                >
+                  Delete Account
+                </button>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

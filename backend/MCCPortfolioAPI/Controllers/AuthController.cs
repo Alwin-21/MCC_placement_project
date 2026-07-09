@@ -65,6 +65,11 @@ namespace MCCPortfolioAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Email) || !dto.Email.EndsWith("@mcc.edu.in", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("Registration is restricted to Madras Christian College email addresses ending with '@mcc.edu.in'.");
+            }
+
             if (string.IsNullOrWhiteSpace(dto.Stream) && !string.IsNullOrWhiteSpace(dto.Department))
             {
                 if (AidedDepartments.Contains(dto.Department))
@@ -153,6 +158,28 @@ namespace MCCPortfolioAPI.Controllers
 
             await _emailService.SendEmailAsync(user.Email, subject, body);
 
+            var log = new AuditLog
+            {
+                Action = "Student Registration",
+                PerformedByEmail = user.Email,
+                Timestamp = DateTime.UtcNow,
+                Details = $"Student {user.FullName} registered successfully with temporary credentials.",
+                IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1"
+            };
+            _context.AuditLogs.Add(log);
+
+            var notif = new Notification
+            {
+                Title = "Student Registration",
+                Message = $"{user.FullName} registered.",
+                Type = "StudentAction",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                UserId = user.Id
+            };
+            _context.Notifications.Add(notif);
+            await _context.SaveChangesAsync();
+
             return Ok(new { success = true, message = "Registration successful. Login credentials have been sent to your registered email." });
         }
 
@@ -172,6 +199,11 @@ namespace MCCPortfolioAPI.Controllers
                 return Unauthorized("Invalid credentials");
             }
 
+            if (!user.IsActive)
+            {
+                return Unauthorized("Your account has been deactivated by the administrator.");
+            }
+
             var validPassword = BCrypt.Net.BCrypt.Verify(
                 dto.Password,
                 user.PasswordHash
@@ -184,6 +216,28 @@ namespace MCCPortfolioAPI.Controllers
 
             var token = _jwtService.GenerateToken(user);
 
+            var log = new AuditLog
+            {
+                Action = "Student Login",
+                PerformedByEmail = user.Email,
+                Timestamp = DateTime.UtcNow,
+                Details = $"Student {user.FullName} logged in successfully.",
+                IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1"
+            };
+            _context.AuditLogs.Add(log);
+
+            var notif = new Notification
+            {
+                Title = "Student Login",
+                Message = $"{user.FullName} logged in.",
+                Type = "StudentAction",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                UserId = user.Id
+            };
+            _context.Notifications.Add(notif);
+            await _context.SaveChangesAsync();
+
             return Ok(new AuthResponseDto
             {
                 Id = user.Id,
@@ -193,6 +247,41 @@ namespace MCCPortfolioAPI.Controllers
                 Role = user.Role.ToString(),
                 IsTemporaryPassword = user.IsTemporaryPassword
             });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.Name);
+            if (!string.IsNullOrEmpty(email))
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == email);
+                if (user != null)
+                {
+                    var log = new AuditLog
+                    {
+                        Action = "Student Logout",
+                        PerformedByEmail = user.Email,
+                        Timestamp = DateTime.UtcNow,
+                        Details = $"Student {user.FullName} logged out.",
+                        IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1"
+                    };
+                    _context.AuditLogs.Add(log);
+
+                    var notif = new Notification
+                    {
+                        Title = "Student Logout",
+                        Message = $"{user.FullName} logged out.",
+                        Type = "StudentAction",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = user.Id
+                    };
+                    _context.Notifications.Add(notif);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return Ok(new { success = true });
         }
 
         // =========================
@@ -252,6 +341,11 @@ namespace MCCPortfolioAPI.Controllers
             if (string.IsNullOrWhiteSpace(dto.Email))
             {
                 return BadRequest("Email is required.");
+            }
+
+            if (!dto.Email.EndsWith("@mcc.edu.in", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("External login is restricted to Madras Christian College email addresses ending with '@mcc.edu.in'.");
             }
 
             var user = await _context.Users

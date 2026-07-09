@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, Lock, ShieldAlert, KeyRound, CheckCircle2 } from "lucide-react";
@@ -8,6 +8,13 @@ import api from "@/services/api";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  }, []);
   
   // Login States
   const [username, setUsername] = useState("");
@@ -124,10 +131,10 @@ export default function LoginPage() {
   const handleExternalSignIn = (provider: string) => {
     setSocialProvider(provider);
     if (provider === "Google") {
-      setSocialEmail("alwin.rosh@gmail.com");
+      setSocialEmail("alwin.rosh@mcc.edu.in");
       setSocialName("Alwin Rosh");
     } else {
-      setSocialEmail("alwinrosh_git@mcc.edu");
+      setSocialEmail("alwinrosh_git@mcc.edu.in");
       setSocialName("Alwin Rosh GitHub");
     }
     setShowSocialModal(true);
@@ -136,6 +143,10 @@ export default function LoginPage() {
   const submitExternalLogin = async () => {
     if (!socialEmail || !socialName) {
       alert("Please enter both email and name.");
+      return;
+    }
+    if (!socialEmail.toLowerCase().endsWith("@mcc.edu.in")) {
+      alert("External login is restricted to Madras Christian College email addresses ending with '@mcc.edu.in'.");
       return;
     }
     try {
@@ -174,13 +185,8 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#781c1c] flex items-center justify-center shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f7f5f0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <circle cx="12" cy="5" r="3" />
-              <line x1="12" y1="8" x2="12" y2="22" />
-              <line x1="6" y1="12" x2="18" y2="12" />
-              <path d="M5 12a7 7 0 0 0 14 0" />
-            </svg>
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden shrink-0 p-0.5 border border-white/20">
+            <img src="/mcc-crest.png" className="w-full h-full object-contain" alt="MCC Crest" />
           </div>
           <div>
             <span className="font-serif font-black text-sm tracking-wider block uppercase">Madras Christian College</span>

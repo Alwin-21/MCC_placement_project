@@ -1,4 +1,5 @@
 using MCCPortfolioAPI.Data;
+using MCCPortfolioAPI.Models;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,31 +20,40 @@ namespace MCCPortfolioAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchStudents(string query)
         {
-            if (string.IsNullOrEmpty(query))
+            query = (query ?? "").Trim().ToLower();
+
+            var studentsQuery = _context.Users
+                .Join(_context.Profiles,
+                    u => u.Id,
+                    p => p.UserId,
+                    (u, p) => new { User = u, Profile = p })
+                .Where(x => x.Profile.IsApproved && x.User.IsActive && x.User.Role == UserRole.Student);
+
+            if (!string.IsNullOrEmpty(query))
             {
-                return Ok(new List<object>());
-            }
-
-            query = query.ToLower();
-
-            var students = await _context.Users
-                .Where(u =>
-                    u.FullName.ToLower().Contains(query) ||
-
+                studentsQuery = studentsQuery.Where(x =>
+                    x.User.FullName.ToLower().Contains(query) ||
+                    x.User.Department.ToLower().Contains(query) ||
+                    x.Profile.CurrentLocation.ToLower().Contains(query) ||
                     _context.Skills.Any(s =>
-                        s.UserId == u.Id &&
+                        s.UserId == x.User.Id &&
                         s.Name.ToLower().Contains(query)
                     )
-                )
-                .Select(u => new
+                );
+            }
+
+            var results = await studentsQuery
+                .Select(x => new
                 {
-                    u.Id,
-                    u.FullName,
-                    Email = u.Email
+                    x.User.Id,
+                    x.User.FullName,
+                    x.User.Email,
+                    x.User.Department,
+                    CurrentLocation = x.Profile.CurrentLocation
                 })
                 .ToListAsync();
 
-            return Ok(students);
+            return Ok(results);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace MCCPortfolioAPI.Controllers
             try
             {
                 var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.Name) ?? "unknown";
-                var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                var ip = HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1";
                 
                 var log = new AuditLog
                 {
@@ -255,13 +255,43 @@ namespace MCCPortfolioAPI.Controllers
             user.Stream = dto.Stream;
             user.RegisterNumber = dto.RegisterNumber;
             
+            user.IsActive = dto.IsActive;
+            
             if (Enum.TryParse<UserRole>(dto.Role, out var newRole))
             {
                 user.Role = newRole;
             }
 
             await _context.SaveChangesAsync();
-            await LogActionAsync("Update Student", $"Updated student details for user ID {id} ({user.Email})");
+            await LogActionAsync("Update Student", $"Updated student details for user ID {id} ({user.Email}, Active: {dto.IsActive})");
+            return Ok(new { success = true });
+        }
+
+        [HttpPost("students/{id}/reset-password")]
+        public async Task<IActionResult> ResetPassword(int id, [FromBody] ResetPasswordModel model)
+        {
+            if (!User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("Student not found.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                return BadRequest("Password is required.");
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            user.IsTemporaryPassword = false;
+            await _context.SaveChangesAsync();
+
+            await LogActionAsync("Reset Password", $"Reset password for student {user.Email} ({user.FullName})");
+
             return Ok(new { success = true });
         }
 
@@ -758,6 +788,36 @@ namespace MCCPortfolioAPI.Controllers
                 return BadRequest("Title and Message are required.");
             }
 
+            if (dto.Type == "Department" && !string.IsNullOrWhiteSpace(dto.Department))
+            {
+                // Fetch all students belonging to the department
+                var students = await _context.Users
+                    .Where(u => u.Role == UserRole.Student && u.Department == dto.Department)
+                    .ToListAsync();
+
+                if (students.Any())
+                {
+                    var notifications = students.Select(student => new Notification
+                    {
+                        Title = dto.Title,
+                        Message = dto.Message,
+                        Type = "Department",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = student.Id
+                    }).ToList();
+
+                    _context.Notifications.AddRange(notifications);
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { success = true, count = notifications.Count, message = $"Notifications sent to {notifications.Count} students in {dto.Department}." });
+                }
+                else
+                {
+                    return BadRequest($"No students found in the department '{dto.Department}'.");
+                }
+            }
+
             var notification = new Notification
             {
                 Title = dto.Title,
@@ -931,11 +991,17 @@ namespace MCCPortfolioAPI.Controllers
         public string Stream { get; set; } = string.Empty;
         public string RegisterNumber { get; set; } = string.Empty;
         public string Role { get; set; } = "Student";
+        public bool IsActive { get; set; } = true;
     }
 
     public class RoleUpdateModel
     {
         public string Role { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordModel
+    {
+        public string Password { get; set; } = string.Empty;
     }
 
     public class ThemeConfigUpdateModel
@@ -952,8 +1018,9 @@ namespace MCCPortfolioAPI.Controllers
     {
         public string Title { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
-        public string Type { get; set; } = "Broadcast"; // Info, Warning, Alert, Broadcast
+        public string Type { get; set; } = "Broadcast"; // Info, Warning, Alert, Broadcast, Department
         public int UserId { get; set; } // 0 or null value indicates broadcast
+        public string Department { get; set; } = string.Empty;
     }
 
     public class SystemBackupDto
